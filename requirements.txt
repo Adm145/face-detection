@@ -1,0 +1,9 @@
+mtcnn
+tensorflow
+opencv-python
+numpy
+pillow
+insightface
+onnxruntime
+faiss-cpu
+scikit-learn
