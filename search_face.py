@@ -1,33 +1,20 @@
-import cv2
-import numpy as np
-import faiss
-import pickle
-from insightface.app import FaceAnalysis
+from utils.embedding import get_image_bgr, get_embedding
+from db.qdrant_store import search
+from db.sqlite_store import get_person
 
-QUERY_IMAGE_PATH = "data/raw/test_arnold.jpg"
-INDEX_PATH = "data/face_index.faiss"
-NAMES_PATH = "data/face_names.pkl"
+QUERY_IMAGE_PATH = "data/raw/test1.jpg"
 TOP_K = 3
 
-app = FaceAnalysis(name="buffalo_l")
-app.prepare(ctx_id=-1, det_size=(640, 640))
+image_bgr = get_image_bgr(QUERY_IMAGE_PATH)
+embedding = get_embedding(image_bgr)
 
-index = faiss.read_index(INDEX_PATH)
-with open(NAMES_PATH, "rb") as f:
-    names = pickle.load(f)
-
-image_bgr = cv2.imread(QUERY_IMAGE_PATH)
-face = app.get(image_bgr)
-
-if not face:
+if embedding is None:
     raise ValueError(f"No face found in query image: {QUERY_IMAGE_PATH}")
 
-query_embedding = face[0].embedding
-query_embedding = query_embedding.reshape(1, -1).astype("float32")
-faiss.normalize_L2(query_embedding)
-
-similarities, positions = index.search(query_embedding, TOP_K)
+results = search(embedding.tolist(), TOP_K)
 
 print(f"Top {TOP_K} matches for {QUERY_IMAGE_PATH}:")
-for similarity, position in zip(similarities[0], positions[0]):
-    print(f"  {names[position]} — similarity {similarity:.3f}")
+for result in results:
+    person_id = result.payload["personId"]
+    _, name, gender, race = get_person(person_id)
+    print(f"  {name} ({gender}, {race}) — similarity {result.score:.3f}")

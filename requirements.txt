@@ -7,3 +7,4 @@ insightface
 onnxruntime
 faiss-cpu
 scikit-learn
+qdrant-client

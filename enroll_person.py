@@ -1,48 +1,46 @@
 import glob
-import cv2
-import numpy as np
-import faiss
-import pickle
-from insightface.app import FaceAnalysis
+import uuid
 
-PERSON_NAME = "Your_Name_Here"
+from qdrant_client.models import PointStruct
+
+from utils.embedding import get_image_bgr, get_embedding
+from db.sqlite_store import insert_person
+from db.qdrant_store import insert
+
+PERSON_NAME = "Kendrick Lamar"
+GENDER = "Male"
+RACE = "White"
 PHOTOS_FOLDER = f"data/enroll/{PERSON_NAME}"
 MIN_PHOTOS = 5
-INDEX_PATH = "data/face_index.faiss"
-NAMES_PATH = "data/face_names.pkl"
-
-app = FaceAnalysis(name="buffalo_l")
-app.prepare(ctx_id=-1, det_size=(640, 640))
-
-index = faiss.read_index(INDEX_PATH)
-with open(NAMES_PATH, "rb") as f:
-    names = pickle.load(f)
 
 photo_paths = glob.glob(f"{PHOTOS_FOLDER}/*.jpg")
 
 embeddings = []
 
 for photo_path in photo_paths:
-    image_bgr = cv2.imread(photo_path)
-    faces = app.get(image_bgr)
+    image_bgr = get_image_bgr(photo_path)
+    embedding = get_embedding(image_bgr)
 
-    if not faces:
+    if embedding is None:
         print(f"Skipped {photo_path}: no face detected")
         continue
 
-    embeddings.append(faces[0].embedding)
+    embeddings.append(embedding)
 
 if len(embeddings) < MIN_PHOTOS:
     raise ValueError(f"Only {len(embeddings)} usable photos found for {PERSON_NAME}, need at least {MIN_PHOTOS}")
 
-embeddings = np.array(embeddings).astype("float32")
-faiss.normalize_L2(embeddings)
+person_id = insert_person(PERSON_NAME, GENDER, RACE)
 
-index.add(embeddings)
-names.extend([PERSON_NAME] * len(embeddings))
+points = [
+    PointStruct(
+        id=str(uuid.uuid4()),
+        vector=embedding.tolist(),
+        payload={"personId": person_id},
+    )
+    for embedding in embeddings
+]
 
-faiss.write_index(index, INDEX_PATH)
-with open(NAMES_PATH, "wb") as f:
-    pickle.dump(names, f)
+insert(points)
 
-print(f"Enrolled {PERSON_NAME} with {len(embeddings)} photos. Index now has {index.ntotal} vectors.")
+print(f"Enrolled {PERSON_NAME} with {len(points)} photos (personId={person_id}).")
