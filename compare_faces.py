@@ -3,7 +3,7 @@ import numpy as np
 from insightface.app import FaceAnalysis
 
 IMAGE_PATH_A = "data/raw/test.jpg"
-IMAGE_PATH_B = "data/raw/test2.jpg"
+IMAGE_PATH_B = "data/raw/test4.jpg"
 
 app = FaceAnalysis(name="buffalo_l")
 app.prepare(ctx_id=-1, det_size=(640, 640))
@@ -32,4 +32,4 @@ magnitude_b = np.linalg.norm(embedding_b)
 # final similarity score
 similarity = dot_product / (magnitude_a * magnitude_b)
 
-print(f"Cosine similarity: {similarity:.4f}")
+print(f"Cosine similarity: {similarity:.3f}")

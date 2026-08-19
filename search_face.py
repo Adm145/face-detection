@@ -4,10 +4,10 @@ import faiss
 import pickle
 from insightface.app import FaceAnalysis
 
-QUERY_IMAGE_PATH = "data/raw/test3.jpg"
+QUERY_IMAGE_PATH = "data/raw/test_arnold.jpg"
 INDEX_PATH = "data/face_index.faiss"
 NAMES_PATH = "data/face_names.pkl"
-TOP_K = 5
+TOP_K = 3
 
 app = FaceAnalysis(name="buffalo_l")
 app.prepare(ctx_id=-1, det_size=(640, 640))
