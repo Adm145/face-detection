@@ -2,7 +2,6 @@ from qdrant_client import QdrantClient
 
 QDRANT_PATH = "data/qdrant_db"
 COLLECTION_NAME = "faces"
-VECTOR_SIZE = 512
 
 def get_client():
     return QdrantClient(path=QDRANT_PATH)
