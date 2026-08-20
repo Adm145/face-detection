@@ -15,6 +15,15 @@ def get_person(person_id):
     return row
 
 
+def list_people():
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT id, name, gender, race FROM people ORDER BY name")
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
+
+
 def update_person(person_id, name=None, gender=None, race=None):
     fields = {}
     if name is not None:

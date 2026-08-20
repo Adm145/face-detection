@@ -1,10 +1,8 @@
-mtcnn
-tensorflow
 opencv-python
 numpy
-pillow
 insightface
 onnxruntime
-faiss-cpu
-scikit-learn
 qdrant-client
+fastapi
+uvicorn[standard]
+python-multipart
