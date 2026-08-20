@@ -3,6 +3,6 @@ numpy
 insightface
 onnxruntime
 qdrant-client
-fastapi
+fastapi[standard]
 uvicorn[standard]
 python-multipart

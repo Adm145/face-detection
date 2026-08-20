@@ -5,10 +5,10 @@ import numpy as np
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from qdrant_client.models import PointStruct
 
+from api.helpers import decode_and_embed
 from api.schemas import CompareResponse, EnrollResponse, PersonOut, SearchResponse, SearchResult
 from db.qdrant_store import insert, search
 from db.sqlite_store import get_person, insert_person, list_people
-from utils.embedding import get_embedding, get_image_bgr_from_bytes
 
 router = APIRouter()
 
@@ -37,10 +37,9 @@ async def enroll(
 
     for file in files:
         data = await file.read()
-        image_bgr = get_image_bgr_from_bytes(data)
-        embedding = get_embedding(image_bgr)
-
-        if embedding is None:
+        try:
+            embedding = decode_and_embed(data, file.filename)
+        except HTTPException:
             skipped_files.append(file.filename)
             continue
 
@@ -76,11 +75,7 @@ async def enroll(
 @router.post("/search", response_model=SearchResponse, response_model_exclude_none=True) #top_k = param -> ...?top_k=3
 async def search_face(file: UploadFile = File(...), top_k: int = 3):
     data = await file.read()
-    image_bgr = get_image_bgr_from_bytes(data)
-    embedding = get_embedding(image_bgr)
-
-    if embedding is None:
-        raise HTTPException(status_code=400, detail="No face found in uploaded image")
+    embedding = decode_and_embed(data, "uploaded image")
 
     results = search(embedding.tolist(), top_k)
 
@@ -111,13 +106,8 @@ async def compare_faces(file_a: UploadFile = File(...), file_b: UploadFile = Fil
     data_a = await file_a.read()
     data_b = await file_b.read()
 
-    embedding_a = get_embedding(get_image_bgr_from_bytes(data_a))
-    embedding_b = get_embedding(get_image_bgr_from_bytes(data_b))
-
-    if embedding_a is None:
-        raise HTTPException(status_code=400, detail="No face found in first image")
-    if embedding_b is None:
-        raise HTTPException(status_code=400, detail="No face found in second image")
+    embedding_a = decode_and_embed(data_a, "first image")
+    embedding_b = decode_and_embed(data_b, "second image")
 
     similarity = float(
         np.dot(embedding_a, embedding_b)
