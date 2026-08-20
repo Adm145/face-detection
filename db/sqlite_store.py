@@ -9,7 +9,7 @@ def get_connection():
 def get_person(person_id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race FROM people WHERE id = ?", (person_id,))
+    cursor.execute("SELECT id, name, gender, race, birthday, profession FROM people WHERE id = ?", (person_id,))
     row = cursor.fetchone()
     connection.close()
     return row

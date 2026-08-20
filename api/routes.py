@@ -1,10 +1,11 @@
 import uuid
 from typing import Optional
 
+import numpy as np
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from qdrant_client.models import PointStruct
 
-from api.schemas import EnrollResponse, PersonOut, SearchResponse, SearchResult
+from api.schemas import CompareResponse, EnrollResponse, PersonOut, SearchResponse, SearchResult
 from db.qdrant_store import insert, search
 from db.sqlite_store import get_person, insert_person, list_people
 from utils.embedding import get_embedding, get_image_bgr_from_bytes
@@ -12,6 +13,7 @@ from utils.embedding import get_embedding, get_image_bgr_from_bytes
 router = APIRouter()
 
 MIN_ENROLL_PHOTOS = 5
+MATCH_THRESHOLD = 0.5
 
 
 @router.get("/people", response_model=list[PersonOut])
@@ -71,7 +73,7 @@ async def enroll(
     )
 
 
-@router.post("/search", response_model=SearchResponse)
+@router.post("/search", response_model=SearchResponse, response_model_exclude_none=True) #top_k = param -> ...?top_k=3
 async def search_face(file: UploadFile = File(...), top_k: int = 3):
     data = await file.read()
     image_bgr = get_image_bgr_from_bytes(data)
@@ -88,15 +90,38 @@ async def search_face(file: UploadFile = File(...), top_k: int = 3):
         row = get_person(person_id)
         if row is None:
             continue
-        _, name, gender, race = row
+        _, name, gender, race, birthday, profession = row
         matches.append(
             SearchResult(
                 person_id=person_id,
                 name=name,
                 gender=gender,
                 race=race,
+                birthday=birthday,
+                profession=profession,
                 score=result.score,
             )
         )
 
     return SearchResponse(matches=matches)
+
+
+@router.post("/compare", response_model=CompareResponse)
+async def compare_faces(file_a: UploadFile = File(...), file_b: UploadFile = File(...)):
+    data_a = await file_a.read()
+    data_b = await file_b.read()
+
+    embedding_a = get_embedding(get_image_bgr_from_bytes(data_a))
+    embedding_b = get_embedding(get_image_bgr_from_bytes(data_b))
+
+    if embedding_a is None:
+        raise HTTPException(status_code=400, detail="No face found in first image")
+    if embedding_b is None:
+        raise HTTPException(status_code=400, detail="No face found in second image")
+
+    similarity = float(
+        np.dot(embedding_a, embedding_b)
+        / (np.linalg.norm(embedding_a) * np.linalg.norm(embedding_b))
+    )
+
+    return CompareResponse(similarity=similarity, match=similarity >= MATCH_THRESHOLD)

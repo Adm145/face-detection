@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class PersonOut(BaseModel):
     id: int
     name: str
-    gender: str
-    race: str
+    gender: Optional[str] = None
+    race: Optional[str] = None
 
 
 class EnrollResponse(BaseModel):
@@ -22,8 +22,15 @@ class SearchResult(BaseModel):
     name: str
     gender: Optional[str] = None
     race: Optional[str] = None
+    birthday: Optional[str] = None
+    profession: Optional[str] = None
     score: float
 
 
 class SearchResponse(BaseModel):
     matches: list[SearchResult]
+
+
+class CompareResponse(BaseModel):
+    similarity: float
+    match: bool

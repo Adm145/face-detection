@@ -5,10 +5,12 @@ cursor = connection.cursor()
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS people (
-        id     INTEGER PRIMARY KEY AUTOINCREMENT,
-        name   TEXT NOT NULL UNIQUE,
-        gender TEXT,
-        race   TEXT
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        name       TEXT NOT NULL UNIQUE,
+        gender     TEXT,
+        race       TEXT,
+        birthday   TEXT,
+        profession TEXT
     )
 """)
 
