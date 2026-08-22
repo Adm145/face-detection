@@ -10,6 +10,7 @@ class PersonOut(BaseModel):
     race: Optional[str] = None
     birthday: Optional[str] = None
     profession: Optional[str] = None
+    slug: str
 
 
 class EnrollResponse(BaseModel):
@@ -26,6 +27,7 @@ class SearchResult(BaseModel):
     race: Optional[str] = None
     birthday: Optional[str] = None
     profession: Optional[str] = None
+    slug: str 
     score: float
 
 

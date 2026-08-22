@@ -9,7 +9,7 @@ def get_connection():
 def get_person(person_id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race, birthday, profession FROM people WHERE id = ?", (person_id,))
+    cursor.execute("SELECT id, name, gender, race, birthday, profession, slug FROM people WHERE id = ?", (person_id,))
     row = cursor.fetchone()
     connection.close()
     return row
@@ -18,7 +18,7 @@ def get_person(person_id):
 def list_people():
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race, birthday, profession FROM people ORDER BY name")
+    cursor.execute("SELECT id, name, gender, race, birthday, profession, slug FROM people ORDER BY id")
     rows = cursor.fetchall()
     connection.close()
     return rows
@@ -50,13 +50,13 @@ def update_person(person_id, name=None, gender=None, race=None, birthday=None, p
     connection.close()
 
 
-def insert_person(name, gender, race, birthday=None, profession=None):
+def insert_person(name, gender, race, birthday=None, profession=None, slug=None):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO people (name, gender, race, birthday, profession) VALUES (?, ?, ?, ?, ?)",
-        (name, gender, race, birthday, profession),
+        "INSERT OR IGNORE INTO people (name, gender, race, birthday, profession, slug) VALUES (?, ?, ?, ?, ?, ?)",
+        (name, gender, race, birthday, profession, slug),
     )
     connection.commit()
 

@@ -10,7 +10,8 @@ cursor.execute("""
         gender     TEXT,
         race       TEXT,
         birthday   TEXT,
-        profession TEXT
+        profession TEXT,
+        slug       TEXT
     )
 """)
 

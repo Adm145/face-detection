@@ -20,7 +20,7 @@ MATCH_THRESHOLD = 0.5
 def get_people():
     rows = list_people()
     return [
-        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5])
+        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6])
         for row in rows
     ]
 
@@ -32,6 +32,7 @@ async def enroll(
     race: Optional[str] = Form(None),
     birthday: Optional[str] = Form(None),
     profession: Optional[str] = Form(None),
+    slug: str = Form(...),
     files: list[UploadFile] = File(...),
 ):
     embeddings = []
@@ -53,7 +54,7 @@ async def enroll(
             detail=f"Only {len(embeddings)} usable photos found, need at least {MIN_ENROLL_PHOTOS}",
         )
 
-    person_id = insert_person(name, gender, race, birthday, profession)
+    person_id = insert_person(name, gender, race, birthday, profession, slug)
 
     points = [
         PointStruct(
@@ -87,7 +88,7 @@ async def search_face(file: UploadFile = File(...), top_k: int = 3):
         row = get_person(person_id)
         if row is None:
             continue
-        _, name, gender, race, birthday, profession = row
+        _, name, gender, race, birthday, profession, slug = row
         matches.append(
             SearchResult(
                 person_id=person_id,
@@ -96,6 +97,7 @@ async def search_face(file: UploadFile = File(...), top_k: int = 3):
                 race=race,
                 birthday=birthday,
                 profession=profession,
+                slug=slug,
                 score=result.score,
             )
         )
