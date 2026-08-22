@@ -20,7 +20,7 @@ MATCH_THRESHOLD = 0.5
 def get_people():
     rows = list_people()
     return [
-        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3])
+        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5])
         for row in rows
     ]
 
@@ -30,6 +30,8 @@ async def enroll(
     name: str = Form(...),
     gender: Optional[str] = Form(None),
     race: Optional[str] = Form(None),
+    birthday: Optional[str] = Form(None),
+    profession: Optional[str] = Form(None),
     files: list[UploadFile] = File(...),
 ):
     embeddings = []
@@ -51,7 +53,7 @@ async def enroll(
             detail=f"Only {len(embeddings)} usable photos found, need at least {MIN_ENROLL_PHOTOS}",
         )
 
-    person_id = insert_person(name, gender, race)
+    person_id = insert_person(name, gender, race, birthday, profession)
 
     points = [
         PointStruct(

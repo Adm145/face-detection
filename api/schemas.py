@@ -8,6 +8,8 @@ class PersonOut(BaseModel):
     name: str
     gender: Optional[str] = None
     race: Optional[str] = None
+    birthday: Optional[str] = None
+    profession: Optional[str] = None
 
 
 class EnrollResponse(BaseModel):

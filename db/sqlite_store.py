@@ -18,13 +18,13 @@ def get_person(person_id):
 def list_people():
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race FROM people ORDER BY name")
+    cursor.execute("SELECT id, name, gender, race, birthday, profession FROM people ORDER BY name")
     rows = cursor.fetchall()
     connection.close()
     return rows
 
 
-def update_person(person_id, name=None, gender=None, race=None):
+def update_person(person_id, name=None, gender=None, race=None, birthday=None, profession=None):
     fields = {}
     if name is not None:
         fields["name"] = name
@@ -32,6 +32,10 @@ def update_person(person_id, name=None, gender=None, race=None):
         fields["gender"] = gender
     if race is not None:
         fields["race"] = race
+    if birthday is not None:
+        fields["birthday"] = birthday
+    if profession is not None:
+        fields["profession"] = profession
 
     if not fields:
         return
@@ -46,13 +50,13 @@ def update_person(person_id, name=None, gender=None, race=None):
     connection.close()
 
 
-def insert_person(name, gender, race):
+def insert_person(name, gender, race, birthday=None, profession=None):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO people (name, gender, race) VALUES (?, ?, ?)",
-        (name, gender, race),
+        "INSERT OR IGNORE INTO people (name, gender, race, birthday, profession) VALUES (?, ?, ?, ?, ?)",
+        (name, gender, race, birthday, profession),
     )
     connection.commit()
 
