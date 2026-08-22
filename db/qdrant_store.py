@@ -3,22 +3,29 @@ from qdrant_client import QdrantClient
 QDRANT_PATH = "data/qdrant_db"
 COLLECTION_NAME = "faces"
 
-def get_client():
-    return QdrantClient(path=QDRANT_PATH)
+_client: QdrantClient | None = None
+
+def get_client() -> QdrantClient:
+    global _client
+    if _client is None:
+        _client = QdrantClient(path=QDRANT_PATH)
+    return _client
+
+
+def close_client() -> QdrantClient:
+    global _client
+    if _client is not None:
+        _client.close()
+        _client = None
 
 
 def search(vector, top_k=3):
-    client = get_client()
-    results = client.query_points(
+    return get_client().query_points(
         collection_name=COLLECTION_NAME,
         query=vector,
         limit=top_k,
     ).points
-    client.close()
-    return results
 
 
 def insert(points):
-    client = get_client()
-    client.upsert(collection_name=COLLECTION_NAME, points=points)
-    client.close()
+    get_client().upsert(collection_name=COLLECTION_NAME, points=points)
