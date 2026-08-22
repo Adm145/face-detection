@@ -6,9 +6,9 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from qdrant_client.models import PointStruct
 
 from api.helpers import decode_and_embed
-from api.schemas import CompareResponse, EnrollResponse, PersonOut, SearchResponse, SearchResult
+from api.schemas import CompareResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult
 from db.qdrant_store import insert, search
-from db.sqlite_store import get_person, insert_person, list_people
+from db.sqlite_store import get_person, insert_person, list_people, update_person
 
 router = APIRouter()
 
@@ -23,6 +23,23 @@ def get_people():
         PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6])
         for row in rows
     ]
+
+
+@router.patch("/people/{person_id}", response_model=PersonOut)
+def update_person_route(person_id: int, payload: PersonUpdate):
+    update_person(
+        person_id,
+        name=payload.name,
+        gender=payload.gender,
+        race=payload.race,
+        birthday=payload.birthday,
+        profession=payload.profession,
+        slug=payload.slug,
+    )
+    row = get_person(person_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6])
 
 
 @router.post("/enroll", response_model=EnrollResponse)

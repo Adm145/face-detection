@@ -13,6 +13,15 @@ class PersonOut(BaseModel):
     slug: str
 
 
+class PersonUpdate(BaseModel):
+    name: Optional[str] = None
+    gender: Optional[str] = None
+    race: Optional[str] = None
+    birthday: Optional[str] = None
+    profession: Optional[str] = None
+    slug: Optional[str] = None
+
+
 class EnrollResponse(BaseModel):
     person_id: int
     name: str

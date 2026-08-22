@@ -24,7 +24,7 @@ def list_people():
     return rows
 
 
-def update_person(person_id, name=None, gender=None, race=None, birthday=None, profession=None):
+def update_person(person_id, name=None, gender=None, race=None, birthday=None, profession=None, slug=None):
     fields = {}
     if name is not None:
         fields["name"] = name
@@ -36,6 +36,8 @@ def update_person(person_id, name=None, gender=None, race=None, birthday=None, p
         fields["birthday"] = birthday
     if profession is not None:
         fields["profession"] = profession
+    if slug is not None:
+        fields["slug"] = slug
 
     if not fields:
         return
