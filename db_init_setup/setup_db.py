@@ -11,7 +11,6 @@ cursor.execute("""
         race       TEXT,
         birthday   TEXT,
         profession TEXT,
-        slug       TEXT,
         image_link TEXT
     )
 """)

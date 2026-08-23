@@ -1,4 +1,5 @@
 from qdrant_client import QdrantClient
+from qdrant_client.models import FieldCondition, Filter, MatchValue
 
 QDRANT_PATH = "data/qdrant_db"
 COLLECTION_NAME = "faces"
@@ -29,3 +30,10 @@ def search(vector, top_k=3):
 
 def insert(points):
     get_client().upsert(collection_name=COLLECTION_NAME, points=points)
+
+
+def delete_by_person(person_id: int):
+    get_client().delete(
+        collection_name=COLLECTION_NAME,
+        points_selector=Filter(must=[FieldCondition(key="personId", match=MatchValue(value=person_id))]),
+    )

@@ -10,7 +10,6 @@ class PersonOut(BaseModel):
     race: Optional[str] = None
     birthday: Optional[str] = None
     profession: Optional[str] = None
-    slug: str
     image_link: Optional[str] = None
 
 
@@ -20,7 +19,6 @@ class PersonUpdate(BaseModel):
     race: Optional[str] = None
     birthday: Optional[str] = None
     profession: Optional[str] = None
-    slug: Optional[str] = None
     image_link: Optional[str] = None
 
 
@@ -38,7 +36,6 @@ class SearchResult(BaseModel):
     race: Optional[str] = None
     birthday: Optional[str] = None
     profession: Optional[str] = None
-    slug: str
     image_link: Optional[str] = None
     score: float
 
@@ -50,3 +47,8 @@ class SearchResponse(BaseModel):
 class CompareResponse(BaseModel):
     similarity: float
     match: bool
+
+
+class DeleteResponse(BaseModel):
+    person_id: int
+    deleted: bool

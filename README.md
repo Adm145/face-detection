@@ -13,7 +13,7 @@ person metadata lives in SQLite, and enrollment photos are hosted on
 - **FastAPI** + Uvicorn — HTTP API
 - **InsightFace** (`buffalo_l`) + OpenCV — face detection and 512-d embeddings
 - **Qdrant** (embedded, file-based) — vector similarity search
-- **SQLite** — person metadata (name, gender, race, birthday, profession, slug, image link)
+- **SQLite** — person metadata (name, gender, race, birthday, profession, image link)
 - **Cloudinary** — enrollment photo storage
 
 ## Setup
@@ -83,7 +83,7 @@ Interactive API docs (Swagger UI) are available at `/docs` once the server is ru
 
 ### `POST /enroll`
 
-Form fields: `name`, `slug` (required), `gender`, `race`, `birthday`, `profession`
+Form fields: `name` (required), `gender`, `race`, `birthday`, `profession`
 (optional), `files` (multipart image files, at least 5 must yield a detectable face).
 The first successfully-processed photo is uploaded to Cloudinary and stored as that
 person's `image_link`.
