@@ -9,7 +9,7 @@ def get_connection():
 def get_person(person_id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race, birthday, profession, slug FROM people WHERE id = ?", (person_id,))
+    cursor.execute("SELECT id, name, gender, race, birthday, profession, slug, image_link FROM people WHERE id = ?", (person_id,))
     row = cursor.fetchone()
     connection.close()
     return row
@@ -18,13 +18,13 @@ def get_person(person_id):
 def list_people():
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race, birthday, profession, slug FROM people ORDER BY id")
+    cursor.execute("SELECT id, name, gender, race, birthday, profession, slug, image_link FROM people ORDER BY id")
     rows = cursor.fetchall()
     connection.close()
     return rows
 
 
-def update_person(person_id, name=None, gender=None, race=None, birthday=None, profession=None, slug=None):
+def update_person(person_id, name=None, gender=None, race=None, birthday=None, profession=None, slug=None, image_link=None):
     fields = {}
     if name is not None:
         fields["name"] = name
@@ -38,6 +38,8 @@ def update_person(person_id, name=None, gender=None, race=None, birthday=None, p
         fields["profession"] = profession
     if slug is not None:
         fields["slug"] = slug
+    if image_link is not None:
+        fields["image_link"] = image_link
 
     if not fields:
         return
@@ -52,13 +54,13 @@ def update_person(person_id, name=None, gender=None, race=None, birthday=None, p
     connection.close()
 
 
-def insert_person(name, gender, race, birthday=None, profession=None, slug=None):
+def insert_person(name, gender, race, birthday=None, profession=None, slug=None, image_link=None):
     connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO people (name, gender, race, birthday, profession, slug) VALUES (?, ?, ?, ?, ?, ?)",
-        (name, gender, race, birthday, profession, slug),
+        "INSERT OR IGNORE INTO people (name, gender, race, birthday, profession, slug, image_link) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (name, gender, race, birthday, profession, slug, image_link),
     )
     connection.commit()
 

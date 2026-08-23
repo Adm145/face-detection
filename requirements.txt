@@ -6,3 +6,5 @@ qdrant-client
 fastapi[standard]
 uvicorn[standard]
 python-multipart
+python-dotenv
+cloudinary

@@ -7,6 +7,7 @@ from qdrant_client.models import PointStruct
 
 from api.helpers import decode_and_embed
 from api.schemas import CompareResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult
+from db.cloudinary_store import upload_photo
 from db.qdrant_store import insert, search
 from db.sqlite_store import get_person, insert_person, list_people, update_person
 
@@ -20,7 +21,7 @@ MATCH_THRESHOLD = 0.5
 def get_people():
     rows = list_people()
     return [
-        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6])
+        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6], image_link=row[7])
         for row in rows
     ]
 
@@ -35,11 +36,12 @@ def update_person_route(person_id: int, payload: PersonUpdate):
         birthday=payload.birthday,
         profession=payload.profession,
         slug=payload.slug,
+        image_link=payload.image_link,
     )
     row = get_person(person_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Person not found")
-    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6])
+    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], slug=row[6], image_link=row[7])
 
 
 @router.post("/enroll", response_model=EnrollResponse)
@@ -54,6 +56,7 @@ async def enroll(
 ):
     embeddings = []
     skipped_files = []
+    first_photo_bytes = None
 
     for file in files:
         data = await file.read()
@@ -64,6 +67,8 @@ async def enroll(
             continue
 
         embeddings.append(embedding)
+        if first_photo_bytes is None:
+            first_photo_bytes = data
 
     if len(embeddings) < MIN_ENROLL_PHOTOS:
         raise HTTPException(
@@ -71,7 +76,8 @@ async def enroll(
             detail=f"Only {len(embeddings)} usable photos found, need at least {MIN_ENROLL_PHOTOS}",
         )
 
-    person_id = insert_person(name, gender, race, birthday, profession, slug)
+    image_link = upload_photo(first_photo_bytes, public_id=slug)
+    person_id = insert_person(name, gender, race, birthday, profession, slug, image_link)
 
     points = [
         PointStruct(
@@ -105,7 +111,7 @@ async def search_face(file: UploadFile = File(...), top_k: int = 3):
         row = get_person(person_id)
         if row is None:
             continue
-        _, name, gender, race, birthday, profession, slug = row
+        _, name, gender, race, birthday, profession, slug, image_link = row
         matches.append(
             SearchResult(
                 person_id=person_id,
@@ -115,6 +121,7 @@ async def search_face(file: UploadFile = File(...), top_k: int = 3):
                 birthday=birthday,
                 profession=profession,
                 slug=slug,
+                image_link=image_link,
                 score=result.score,
             )
         )
