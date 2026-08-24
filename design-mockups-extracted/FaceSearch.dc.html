@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+      --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-full: 9999px; --radius-pill: 100px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font-sans); }
+    a { color: var(--color-link); text-decoration: none; }
+    a:hover { filter: brightness(0.85); }
+  </style>
+</helmet>
+
+<div style="width:1280px; min-height:960px; display:flex; flex-direction:column; --color-primary:{{ colors.primary }}; --color-on-primary:{{ colors.onPrimary }}; --color-ink:{{ colors.ink }}; --color-body:{{ colors.body }}; --color-mute:{{ colors.mute }}; --color-hairline:{{ colors.hairline }}; --color-hairline-strong:{{ colors.hairlineStrong }}; --color-canvas:{{ colors.canvas }}; --color-canvas-soft:{{ colors.canvasSoft }}; --color-canvas-soft-2:{{ colors.canvasSoft2 }}; --color-link:{{ colors.link }}; --color-success-bg:{{ colors.successBg }}; --shadow-card:{{ colors.shadowCard }}; --shadow-float:{{ colors.shadowFloat }}; background:var(--color-canvas-soft); color:var(--color-body);">
+
+  <div style="height:64px; flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; padding:0 24px; background:var(--color-canvas); border-bottom:1px solid var(--color-hairline);">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="color:var(--color-ink)">
+        <path d="M2 6V3a1 1 0 0 1 1-1h3M18 6V3a1 1 0 0 0-1-1h-3M2 14v3a1 1 0 0 0 1 1h3M18 14v3a1 1 0 0 1-1 1h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span style="font-size:14px; font-weight:600; color:var(--color-ink); letter-spacing:-0.28px;">FaceDB</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:4px;">
+      <span style="font-size:14px; padding:6px 12px; border-radius:var(--radius-full); color:var(--color-body);">Enroll</span>
+      <span style="font-size:14px; padding:6px 12px; border-radius:var(--radius-full); color:var(--color-body);">People</span>
+      <span style="font-size:14px; padding:6px 12px; border-radius:var(--radius-full); background:var(--color-canvas-soft-2); color:var(--color-ink); font-weight:500;">Search</span>
+      <span style="font-size:14px; padding:6px 12px; border-radius:var(--radius-full); color:var(--color-body);">Compare</span>
+    </div>
+    <div style="width:76px;"></div>
+  </div>
+
+  <div style="flex:1 1 auto; display:flex; justify-content:center; padding:64px 24px;">
+    <div style="width:640px; display:flex; flex-direction:column; gap:32px;">
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <span style="display:inline-flex; align-self:flex-start; align-items:center; height:22px; padding:0 8px; border-radius:var(--radius-full); background:var(--color-canvas-soft-2); color:var(--color-body); font-family:var(--font-mono); font-size:12px;">Find a match</span>
+        <h1 style="margin:0; font-size:32px; line-height:40px; font-weight:600; letter-spacing:-1.28px; color:var(--color-ink);">Search enrolled faces.</h1>
+        <p style="margin:0; font-size:16px; line-height:24px; color:var(--color-body);">Upload a photo and we'll rank the closest matches already in the system.</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; text-align:center; border:1px dashed var(--color-hairline-strong); border-radius:var(--radius-md); background:var(--color-canvas-soft-2); padding:32px 16px;">
+        <p style="margin:0; font-size:14px; font-weight:500; color:var(--color-ink);">Drag a photo here, or click to browse</p>
+        <p style="margin:0; font-size:12px; color:var(--color-mute);">JPG or PNG · one clear, front-facing photo</p>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:14px; font-weight:500; color:var(--color-ink);">3 matches found</span>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ matches }}" as="m" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:16px; background:var(--color-canvas); border-radius:var(--radius-md); box-shadow:var(--shadow-card); padding:16px;">
+              <div style="width:56px; height:56px; flex:0 0 auto; border-radius:var(--radius-sm); background:var(--color-canvas-soft-2); display:flex; align-items:center; justify-content:center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="color:var(--color-hairline-strong)">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div style="flex:1 1 auto; display:flex; flex-direction:column; gap:2px;">
+                <span style="font-size:16px; font-weight:500; color:var(--color-ink);">{{ m.name }}</span>
+                <span style="font-size:14px; color:var(--color-body);">{{ m.profession }}</span>
+              </div>
+              <sc-if value="{{ m.isBest }}" hint-placeholder-val="{{ true }}">
+                <span style="display:inline-flex; align-items:center; height:22px; padding:0 10px; border-radius:var(--radius-full); background:var(--color-success-bg); color:var(--color-link); font-size:13px; font-weight:500;">Best match · {{ m.scorePct }}%</span>
+              </sc-if>
+              <sc-if value="{{ m.notBest }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:14px; color:var(--color-mute); font-family:var(--font-mono);">{{ m.scorePct }}%</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"darkMode":{"editor":"boolean","default":true,"section":"Theme"}}'>
+const LIGHT = {
+  primary: "#171717", onPrimary: "#ffffff", ink: "#171717", body: "#4d4d4d", mute: "#888888",
+  hairline: "#ebebeb", hairlineStrong: "#a1a1a1", canvas: "#ffffff", canvasSoft: "#fafafa", canvasSoft2: "#f5f5f5",
+  link: "#0070f3", successBg: "rgba(0,112,243,0.12)",
+  shadowCard: "0px 1px 1px rgba(0,0,0,.02), 0px 2px 2px rgba(0,0,0,.04), inset 0 0 0 1px rgba(0,0,0,.08)",
+  shadowFloat: "0px 2px 2px rgba(0,0,0,.04), 0px 8px 16px -4px rgba(0,0,0,.04), inset 0 0 0 1px rgba(0,0,0,.08)"
+};
+const DARK = {
+  primary: "#f2f2f2", onPrimary: "#0a0a0a", ink: "#f2f2f2", body: "#a1a1a1", mute: "#6e6e6e",
+  hairline: "#2a2a2a", hairlineStrong: "#454545", canvas: "#161616", canvasSoft: "#0a0a0a", canvasSoft2: "#1e1e1e",
+  link: "#3b9eff", successBg: "rgba(59,158,255,0.16)",
+  shadowCard: "0px 1px 1px rgba(0,0,0,.5), 0px 2px 2px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08)",
+  shadowFloat: "0px 2px 2px rgba(0,0,0,.5), 0px 8px 16px -4px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08)"
+};
+class Component extends DCLogic {
+  renderVals() {
+    const darkMode = this.props.darkMode ?? false;
+    const colors = darkMode ? DARK : LIGHT;
+    const raw = [
+      { name: "Maya Chen", profession: "Software Engineer", score: 0.94 },
+      { name: "Amara Okafor", profession: "Product Designer", score: 0.71 },
+      { name: "Elena Novak", profession: "Architect", score: 0.63 }
+    ];
+    const matches = raw.map((m, i) => ({
+      ...m,
+      scorePct: Math.round(m.score * 100),
+      isBest: i === 0,
+      notBest: i !== 0
+    }));
+    return { matches, colors };
+  }
+}
+</script>
+</body>
+</html>

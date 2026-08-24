@@ -6,7 +6,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from qdrant_client.models import PointStruct
 
 from api.helpers import decode_and_embed
-from api.schemas import CompareResponse, DeleteResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult
+from api.schemas import CompareResponse, DeleteResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult, validate_birthday
 from db.cloudinary_store import upload_photo
 from db.qdrant_store import delete_by_person, insert, search
 from db.sqlite_store import delete_person, get_person, insert_person, list_people, update_person
@@ -24,6 +24,14 @@ def get_people():
         PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
         for row in rows
     ]
+
+
+@router.get("/people/{person_id}", response_model=PersonOut)
+def get_person_route(person_id: int):
+    row = get_person(person_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
 
 
 @router.patch("/people/{person_id}", response_model=PersonOut)
@@ -64,6 +72,11 @@ async def enroll(
     profession: Optional[str] = Form(None),
     files: list[UploadFile] = File(...),
 ):
+    try:
+        validate_birthday(birthday)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
     embeddings = []
     skipped_files = []
     first_photo_bytes = None

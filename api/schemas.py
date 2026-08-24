@@ -1,6 +1,19 @@
+from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+BIRTHDAY_FORMAT = "%d-%m-%Y"
+
+
+def validate_birthday(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return value
+    try:
+        datetime.strptime(value, BIRTHDAY_FORMAT)
+    except ValueError:
+        raise ValueError("birthday must be in DD-MM-YYYY format")
+    return value
 
 
 class PersonOut(BaseModel):
@@ -12,6 +25,8 @@ class PersonOut(BaseModel):
     profession: Optional[str] = None
     image_link: Optional[str] = None
 
+    _validate_birthday = field_validator("birthday")(validate_birthday)
+
 
 class PersonUpdate(BaseModel):
     name: Optional[str] = None
@@ -20,6 +35,8 @@ class PersonUpdate(BaseModel):
     birthday: Optional[str] = None
     profession: Optional[str] = None
     image_link: Optional[str] = None
+
+    _validate_birthday = field_validator("birthday")(validate_birthday)
 
 
 class EnrollResponse(BaseModel):

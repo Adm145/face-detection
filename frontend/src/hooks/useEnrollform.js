@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { API_URL } from '../config'
+import { toDDMMYYYY } from '../utils/date'
 
 const MIN_PHOTOS = 5
 
@@ -68,7 +69,7 @@ export const useEnrollForm = () => {
         formData.append('name', name.trim())
         if (gender) formData.append('gender', gender)
         if (race) formData.append('race', race)
-        if (birthday) formData.append('birthday', birthday)
+        if (birthday) formData.append('birthday', toDDMMYYYY(birthday))
         if (profession) formData.append('profession', profession)
         photos.forEach(({ file }) => formData.append('files', file))
 

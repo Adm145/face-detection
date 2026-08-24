@@ -1,0 +1,47 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 960,
+      "title": "People List"
+    },
+    {
+      "file": "PersonDetail.dc.html",
+      "x": 1360,
+      "y": 0,
+      "w": 1280,
+      "h": 960,
+      "title": "Person Detail / Edit"
+    },
+    {
+      "file": "FaceSearch.dc.html",
+      "x": 0,
+      "y": 1040,
+      "w": 1280,
+      "h": 960,
+      "title": "Face Search"
+    },
+    {
+      "file": "CompareFaces.dc.html",
+      "x": 1360,
+      "y": 1040,
+      "w": 1280,
+      "h": 960,
+      "title": "Compare Faces"
+    },
+    {
+      "file": "PeopleListMobile.dc.html",
+      "x": 2760,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "People List — Mobile"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

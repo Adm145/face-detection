@@ -2,7 +2,7 @@
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: var(--space-4xl) var(--space-lg);
+  padding: var(--space-3xl) var(--space-lg);
   background: var(--color-canvas-soft);
 }
 
@@ -32,29 +32,6 @@
   line-height: 24px;
 }
 
-.badge {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  padding: 0 var(--space-xs);
-  height: 22px;
-  border-radius: var(--radius-full);
-  background: var(--color-canvas-soft-2);
-  color: var(--color-body);
-  font-family: var(--font-mono);
-  font-size: 12px;
-}
-
-.badge-success {
-  background: color-mix(in srgb, var(--color-link) 12%, white);
-  color: var(--color-link);
-}
-
-.badge-warning {
-  background: var(--color-warning-soft);
-  color: var(--color-warning-deep);
-}
-
 .upload-card {
   display: flex;
   flex-direction: column;
@@ -65,37 +42,6 @@
   box-shadow: var(--shadow-float);
 }
 
-.error-banner {
-  background: var(--color-error-soft);
-  color: var(--color-error-deep);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
-  font-size: 14px;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.field-full {
-  grid-column: 1 / -1;
-}
-
-.field-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-ink);
-  letter-spacing: -0.28px;
-}
-
 .count-ok {
   color: var(--color-link);
   font-weight: 400;
@@ -104,23 +50,6 @@
 .count-pending {
   color: var(--color-mute);
   font-weight: 400;
-}
-
-.text-input {
-  height: 40px;
-  padding: 0 var(--space-sm);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-hairline);
-  background: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.text-input:focus {
-  border-color: var(--color-hairline-strong);
 }
 
 .dropzone {
@@ -197,32 +126,6 @@
 
 .thumb-remove:hover {
   background: var(--color-primary);
-}
-
-.btn-primary {
-  height: 44px;
-  padding: 0 var(--space-lg);
-  border: none;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.88;
-}
-
-.btn-primary:disabled {
-  background: var(--color-hairline-strong);
-  cursor: not-allowed;
-}
-
-.btn-block {
-  width: 100%;
 }
 
 .success-card {
