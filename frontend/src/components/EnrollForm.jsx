@@ -71,13 +71,18 @@ export default function EnrollForm({
 
             <label className="field">
               <span className="field-label">Race</span>
-              <input
+              <select
                 className="text-input"
-                type="text"
                 value={race}
                 onChange={(e) => setEnrollFields((prev) => ({ ...prev, race: e.target.value }))}
-                placeholder="Optional"
-              />
+              >
+                <option value="">—</option>
+                <option value="White">White</option>
+                <option value="Black">Black</option>
+                <option value="Asian">Asian</option>
+                <option value="Indian">Indian</option>
+                <option value="Other">Other</option>
+              </select>
             </label>
 
             <label className="field">
