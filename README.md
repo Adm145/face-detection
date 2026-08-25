@@ -162,6 +162,10 @@ the real safety net is this machine's scheduled pull.
 
 Backend on [Railway](https://railway.app), frontend on [Netlify](https://netlify.com).
 
+**Live URLs:**
+- Backend: https://face-detection-production-eb5a.up.railway.app
+- Frontend: https://facesdb.netlify.app
+
 **Backend (Railway)**: deploys from the root `Dockerfile`. In the Railway
 dashboard, set every variable from your local `.env` as an environment variable
 on the service (Cloudinary, Qdrant, admin/JWT, `DATABASE_URL`) — do not upload
