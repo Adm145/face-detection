@@ -1,10 +1,18 @@
 import { useRef } from 'react'
 import PersonAvatar from './PersonAvatar'
 
-export default function PersonPhotoUpload({ imageLink, status, error, onUpload }) {
+export default function PersonPhotoUpload({ imageLink, status, error, onUpload, isAuthenticated }) {
   const fileInputRef = useRef(null)
 
   const openPicker = () => fileInputRef.current?.click()
+
+  if (!isAuthenticated) {
+    return (
+      <div className="person-detail-photo">
+        <PersonAvatar imageLink={imageLink} iconSize={48} />
+      </div>
+    )
+  }
 
   return (
     <>

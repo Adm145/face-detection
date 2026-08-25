@@ -1,11 +1,13 @@
 import { Link, useParams } from "react-router-dom";
 import { usePersonDetail } from "../../hooks/usePersonDetail";
+import { useAuth } from "../../context/AuthContext";
 import PersonDetailForm from "../../components/PersonDetailForm";
 import AddPhotosPanel from "../../components/AddPhotosPanel";
 import "./PersonDetailPage.css";
 
 export default function PersonDetailPage() {
   const { id } = useParams();
+  const { isAuthenticated } = useAuth();
   const {
     person,
     loading,
@@ -63,9 +65,10 @@ export default function PersonDetailPage() {
               photoStatus={photoStatus}
               photoError={photoError}
               handlePhotoUpload={handlePhotoUpload}
+              isAuthenticated={isAuthenticated}
             />
 
-            <AddPhotosPanel personId={id} />
+            {isAuthenticated && <AddPhotosPanel personId={id} />}
           </>
         )}
       </div>

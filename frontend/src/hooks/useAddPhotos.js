@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { API_URL } from '../config'
+import { useAuth } from '../context/AuthContext'
 
 export const useAddPhotos = (personId) => {
+  const { token } = useAuth()
   const [photos, setPhotos] = useState([])
   const [isDragging, setIsDragging] = useState(false)
 
@@ -53,7 +55,11 @@ export const useAddPhotos = (personId) => {
     photos.forEach(({ file }) => formData.append('files', file))
 
     try {
-      const response = await fetch(`${API_URL}/people/${personId}/photos`, { method: 'POST', body: formData })
+      const response = await fetch(`${API_URL}/people/${personId}/photos`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
       const data = await response.json()
 
       if (!response.ok) {

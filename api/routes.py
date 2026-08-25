@@ -1,12 +1,14 @@
+import os
 import uuid
 from typing import Optional
 
 import numpy as np
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from qdrant_client.models import PointStruct
 
+from api.auth import create_access_token, require_admin, verify_password
 from api.helpers import decode_and_embed
-from api.schemas import AddPhotosResponse, CompareResponse, DeleteResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult, validate_birthday
+from api.schemas import AddPhotosResponse, CompareResponse, DeleteResponse, EnrollResponse, LoginRequest, LoginResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult, validate_birthday
 from db.cloudinary_store import upload_photo
 from db.qdrant_store import delete_by_person, insert, search, search_within_person
 from db.sqlite_store import delete_person, get_person, insert_person, list_people, update_person
@@ -15,6 +17,15 @@ router = APIRouter()
 
 MIN_ENROLL_PHOTOS = 5
 MATCH_THRESHOLD = 0.5
+
+
+@router.post("/auth/login", response_model=LoginResponse)
+def login(payload: LoginRequest):
+    if payload.username != os.environ["ADMIN_USERNAME"] or not verify_password(
+        payload.password, os.environ["ADMIN_PASSWORD_HASH"]
+    ):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+    return LoginResponse(access_token=create_access_token(payload.username))
 
 
 @router.get("/people", response_model=list[PersonOut])
@@ -34,7 +45,7 @@ def get_person_route(person_id: int):
     return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
 
 
-@router.patch("/people/{person_id}", response_model=PersonOut)
+@router.patch("/people/{person_id}", response_model=PersonOut, dependencies=[Depends(require_admin)])
 def update_person_route(person_id: int, payload: PersonUpdate):
     update_person(
         person_id,
@@ -51,7 +62,7 @@ def update_person_route(person_id: int, payload: PersonUpdate):
     return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
 
 
-@router.delete("/people/{person_id}", response_model=DeleteResponse)
+@router.delete("/people/{person_id}", response_model=DeleteResponse, dependencies=[Depends(require_admin)])
 def delete_person_route(person_id: int):
     row = get_person(person_id)
     if row is None:
@@ -63,7 +74,7 @@ def delete_person_route(person_id: int):
     return DeleteResponse(person_id=person_id, deleted=True)
 
 
-@router.post("/people/{person_id}/photo", response_model=PersonOut)
+@router.post("/people/{person_id}/photo", response_model=PersonOut, dependencies=[Depends(require_admin)])
 async def update_person_photo(person_id: int, file: UploadFile = File(...)):
     row = get_person(person_id)
     if row is None:
@@ -83,7 +94,7 @@ async def update_person_photo(person_id: int, file: UploadFile = File(...)):
     return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
 
 
-@router.post("/people/{person_id}/photos", response_model=AddPhotosResponse)
+@router.post("/people/{person_id}/photos", response_model=AddPhotosResponse, dependencies=[Depends(require_admin)])
 async def add_person_photos(person_id: int, files: list[UploadFile] = File(...)):
     row = get_person(person_id)
     if row is None:
@@ -115,7 +126,7 @@ async def add_person_photos(person_id: int, files: list[UploadFile] = File(...))
     return AddPhotosResponse(person_id=person_id, added_count=len(points), skipped_files=skipped_files)
 
 
-@router.post("/enroll", response_model=EnrollResponse)
+@router.post("/enroll", response_model=EnrollResponse, dependencies=[Depends(require_admin)])
 async def enroll(
     name: str = Form(...),
     gender: Optional[str] = Form(None),
