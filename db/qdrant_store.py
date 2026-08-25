@@ -32,6 +32,15 @@ def insert(points):
     get_client().upsert(collection_name=COLLECTION_NAME, points=points)
 
 
+def search_within_person(vector, person_id: int, top_k=1):
+    return get_client().query_points(
+        collection_name=COLLECTION_NAME,
+        query=vector,
+        query_filter=Filter(must=[FieldCondition(key="personId", match=MatchValue(value=person_id))]),
+        limit=top_k,
+    ).points
+
+
 def delete_by_person(person_id: int):
     get_client().delete(
         collection_name=COLLECTION_NAME,

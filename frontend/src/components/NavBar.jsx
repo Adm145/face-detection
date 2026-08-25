@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 const LINKS = [
   { to: '/', label: 'Enroll' },
   { to: '/people', label: 'People' },
+  { to: '/search', label: 'Search' },
 ]
 
 export default function NavBar() {
@@ -31,7 +32,6 @@ export default function NavBar() {
             </Link>
           )
         })}
-        <span className="nav-link-disabled">Search</span>
         <span className="nav-link-disabled">Compare</span>
       </div>
 

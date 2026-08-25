@@ -69,3 +69,9 @@ class CompareResponse(BaseModel):
 class DeleteResponse(BaseModel):
     person_id: int
     deleted: bool
+
+
+class AddPhotosResponse(BaseModel):
+    person_id: int
+    added_count: int
+    skipped_files: list[str]

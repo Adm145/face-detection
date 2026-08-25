@@ -6,9 +6,9 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from qdrant_client.models import PointStruct
 
 from api.helpers import decode_and_embed
-from api.schemas import CompareResponse, DeleteResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult, validate_birthday
+from api.schemas import AddPhotosResponse, CompareResponse, DeleteResponse, EnrollResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult, validate_birthday
 from db.cloudinary_store import upload_photo
-from db.qdrant_store import delete_by_person, insert, search
+from db.qdrant_store import delete_by_person, insert, search, search_within_person
 from db.sqlite_store import delete_person, get_person, insert_person, list_people, update_person
 
 router = APIRouter()
@@ -61,6 +61,58 @@ def delete_person_route(person_id: int):
     delete_person(person_id)
 
     return DeleteResponse(person_id=person_id, deleted=True)
+
+
+@router.post("/people/{person_id}/photo", response_model=PersonOut)
+async def update_person_photo(person_id: int, file: UploadFile = File(...)):
+    row = get_person(person_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+
+    data = await file.read()
+    embedding = decode_and_embed(data, file.filename)
+
+    matches = search_within_person(embedding.tolist(), person_id, top_k=1)
+    if not matches or matches[0].score < MATCH_THRESHOLD:
+        raise HTTPException(status_code=400, detail="This photo doesn't look like a match for this person")
+
+    image_link = upload_photo(data)
+    update_person(person_id, image_link=image_link)
+
+    row = get_person(person_id)
+    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
+
+
+@router.post("/people/{person_id}/photos", response_model=AddPhotosResponse)
+async def add_person_photos(person_id: int, files: list[UploadFile] = File(...)):
+    row = get_person(person_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Person not found")
+
+    points = []
+    skipped_files = []
+
+    for file in files:
+        data = await file.read()
+        try:
+            embedding = decode_and_embed(data, file.filename)
+        except HTTPException:
+            skipped_files.append(file.filename)
+            continue
+
+        matches = search_within_person(embedding.tolist(), person_id, top_k=1)
+        if not matches or matches[0].score < MATCH_THRESHOLD:
+            skipped_files.append(file.filename)
+            continue
+
+        points.append(
+            PointStruct(id=str(uuid.uuid4()), vector=embedding.tolist(), payload={"personId": person_id})
+        )
+
+    if points:
+        insert(points)
+
+    return AddPhotosResponse(person_id=person_id, added_count=len(points), skipped_files=skipped_files)
 
 
 @router.post("/enroll", response_model=EnrollResponse)
@@ -122,7 +174,7 @@ async def enroll(
 
 
 @router.post("/search", response_model=SearchResponse, response_model_exclude_none=True) #top_k = param -> ...?top_k=3
-async def search_face(file: UploadFile = File(...), top_k: int = 3):
+async def search_face(file: UploadFile = File(...), top_k: int = 1):
     data = await file.read()
     embedding = decode_and_embed(data, "uploaded image")
 

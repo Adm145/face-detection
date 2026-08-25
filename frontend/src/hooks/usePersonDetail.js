@@ -27,6 +27,9 @@ export const usePersonDetail = (personId) => {
   const [deleteStatus, setDeleteStatus] = useState('idle') // idle | deleting | error
   const [deleteError, setDeleteError] = useState('')
 
+  const [photoStatus, setPhotoStatus] = useState('idle') // idle | uploading | error
+  const [photoError, setPhotoError] = useState('')
+
   useEffect(() => {
     let cancelled = false
 
@@ -114,6 +117,34 @@ export const usePersonDetail = (personId) => {
     }
   }
 
+  const handlePhotoUpload = async (file) => {
+    if (!file || photoStatus === 'uploading') return
+
+    setPhotoStatus('uploading')
+    setPhotoError('')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch(`${API_URL}/people/${personId}/photo`, {
+        method: 'POST',
+        body: formData,
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Photo upload failed')
+      }
+
+      setPerson(data)
+      setPhotoStatus('idle')
+    } catch (err) {
+      setPhotoError(err.message || 'Something went wrong')
+      setPhotoStatus('error')
+    }
+  }
+
   const updateFormFields = (updater) => {
     setSaveStatus((prev) => (prev === 'success' ? 'idle' : prev))
     setFormFields(updater)
@@ -133,5 +164,8 @@ export const usePersonDetail = (personId) => {
     deleteStatus,
     deleteError,
     handleDelete,
+    photoStatus,
+    photoError,
+    handlePhotoUpload,
   }
 }
