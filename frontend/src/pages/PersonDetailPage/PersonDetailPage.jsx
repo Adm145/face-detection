@@ -25,6 +25,9 @@ export default function PersonDetailPage() {
     photoStatus,
     photoError,
     handlePhotoUpload,
+    repositioning,
+    setRepositioning,
+    handlePositionSave,
   } = usePersonDetail(id);
 
   return (
@@ -66,6 +69,9 @@ export default function PersonDetailPage() {
               photoError={photoError}
               handlePhotoUpload={handlePhotoUpload}
               isAuthenticated={isAuthenticated}
+              repositioning={repositioning}
+              setRepositioning={setRepositioning}
+              handlePositionSave={handlePositionSave}
             />
 
             {isAuthenticated && <AddPhotosPanel personId={id} />}

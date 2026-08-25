@@ -24,6 +24,8 @@ class PersonOut(BaseModel):
     birthday: Optional[str] = None
     profession: Optional[str] = None
     image_link: Optional[str] = None
+    photo_position_x: float = 50
+    photo_position_y: float = 50
 
     _validate_birthday = field_validator("birthday")(validate_birthday)
 
@@ -35,6 +37,8 @@ class PersonUpdate(BaseModel):
     birthday: Optional[str] = None
     profession: Optional[str] = None
     image_link: Optional[str] = None
+    photo_position_x: Optional[float] = None
+    photo_position_y: Optional[float] = None
 
     _validate_birthday = field_validator("birthday")(validate_birthday)
 
@@ -54,6 +58,8 @@ class SearchResult(BaseModel):
     birthday: Optional[str] = None
     profession: Optional[str] = None
     image_link: Optional[str] = None
+    photo_position_x: float = 50
+    photo_position_y: float = 50
     score: float
 
 

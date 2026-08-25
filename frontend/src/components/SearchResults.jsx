@@ -21,7 +21,12 @@ export default function SearchResults({ matches }) {
           return (
             <Link key={`${match.person_id}-${index}`} to={`/people/${match.person_id}`} className="match-row">
               <div className="match-avatar">
-                <PersonAvatar imageLink={match.image_link} iconSize={24} />
+                <PersonAvatar
+                  imageLink={match.image_link}
+                  iconSize={24}
+                  positionX={match.photo_position_x}
+                  positionY={match.photo_position_y}
+                />
               </div>
               <div className="match-info">
                 <span className="match-name">{match.name}</span>

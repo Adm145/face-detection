@@ -17,6 +17,21 @@ router = APIRouter()
 
 MIN_ENROLL_PHOTOS = 5
 MATCH_THRESHOLD = 0.5
+DEFAULT_PHOTO_POSITION = 50
+
+
+def _person_out(row) -> PersonOut:
+    return PersonOut(
+        id=row[0],
+        name=row[1],
+        gender=row[2],
+        race=row[3],
+        birthday=row[4],
+        profession=row[5],
+        image_link=row[6],
+        photo_position_x=row[7],
+        photo_position_y=row[8],
+    )
 
 
 @router.post("/auth/login", response_model=LoginResponse)
@@ -31,10 +46,7 @@ def login(payload: LoginRequest):
 @router.get("/people", response_model=list[PersonOut])
 def get_people():
     rows = list_people()
-    return [
-        PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
-        for row in rows
-    ]
+    return [_person_out(row) for row in rows]
 
 
 @router.get("/people/{person_id}", response_model=PersonOut)
@@ -42,7 +54,7 @@ def get_person_route(person_id: int):
     row = get_person(person_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Person not found")
-    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
+    return _person_out(row)
 
 
 @router.patch("/people/{person_id}", response_model=PersonOut, dependencies=[Depends(require_admin)])
@@ -55,11 +67,13 @@ def update_person_route(person_id: int, payload: PersonUpdate):
         birthday=payload.birthday,
         profession=payload.profession,
         image_link=payload.image_link,
+        photo_position_x=payload.photo_position_x,
+        photo_position_y=payload.photo_position_y,
     )
     row = get_person(person_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Person not found")
-    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
+    return _person_out(row)
 
 
 @router.delete("/people/{person_id}", response_model=DeleteResponse, dependencies=[Depends(require_admin)])
@@ -88,10 +102,15 @@ async def update_person_photo(person_id: int, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="This photo doesn't look like a match for this person")
 
     image_link = upload_photo(data)
-    update_person(person_id, image_link=image_link)
+    update_person(
+        person_id,
+        image_link=image_link,
+        photo_position_x=DEFAULT_PHOTO_POSITION,
+        photo_position_y=DEFAULT_PHOTO_POSITION,
+    )
 
     row = get_person(person_id)
-    return PersonOut(id=row[0], name=row[1], gender=row[2], race=row[3], birthday=row[4], profession=row[5], image_link=row[6])
+    return _person_out(row)
 
 
 @router.post("/people/{person_id}/photos", response_model=AddPhotosResponse, dependencies=[Depends(require_admin)])
@@ -197,7 +216,7 @@ async def search_face(file: UploadFile = File(...), top_k: int = 1):
         row = get_person(person_id)
         if row is None:
             continue
-        _, name, gender, race, birthday, profession, image_link = row
+        _, name, gender, race, birthday, profession, image_link, photo_position_x, photo_position_y = row
         matches.append(
             SearchResult(
                 person_id=person_id,
@@ -207,6 +226,8 @@ async def search_face(file: UploadFile = File(...), top_k: int = 1):
                 birthday=birthday,
                 profession=profession,
                 image_link=image_link,
+                photo_position_x=photo_position_x,
+                photo_position_y=photo_position_y,
                 score=result.score,
             )
         )
