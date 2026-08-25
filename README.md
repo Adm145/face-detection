@@ -6,7 +6,8 @@ enrolled people through a React admin UI.
 
 Face embeddings are generated with [InsightFace](https://github.com/deepinsight/insightface)
 (`buffalo_l`) and stored/searched with [Qdrant Cloud](https://qdrant.tech/), with a
-local Qdrant copy kept as a write-through backup. Person metadata lives in SQLite,
+local Qdrant copy kept as a write-through backup. Person metadata lives in
+[PostgreSQL](https://www.postgresql.org/) (hosted on [Neon](https://neon.tech/)),
 enrollment photos are hosted on [Cloudinary](https://cloudinary.com/), and admin-only
 actions (enrolling, editing, deleting, managing photos) are protected by JWT login.
 
@@ -17,8 +18,10 @@ actions (enrolling, editing, deleting, managing photos) are protected by JWT log
 - **InsightFace** (`buffalo_l`) + OpenCV — face detection and 512-d embeddings
 - **Qdrant Cloud** — primary vector similarity search, with a local embedded Qdrant
   copy at `data/qdrant_db` kept in sync as a backup on every insert/delete
-- **SQLite** — person metadata (name, gender, race, birthday, profession, image
-  link, profile photo framing)
+- **PostgreSQL** (via `psycopg`, pooled) — primary store for person metadata
+  (name, gender, race, birthday, profession, image link, profile photo framing),
+  with a local SQLite copy at `data/people.db` kept in sync as a backup on every
+  insert/update/delete
 - **Cloudinary** — profile/enrollment photo storage
 - **PyJWT** + **bcrypt** — admin authentication
 
@@ -60,6 +63,8 @@ QDRANT_CLUSTER_URL=
 ADMIN_USERNAME=
 ADMIN_PASSWORD_HASH=
 JWT_SECRET=
+
+DATABASE_URL=
 ```
 
 - **Cloudinary**: from your [Cloudinary dashboard](https://console.cloudinary.com/).
@@ -74,6 +79,8 @@ JWT_SECRET=
   ```
   `JWT_SECRET` can be any long random string, e.g.
   `python -c "import secrets; print(secrets.token_hex(32))"`.
+- **Database**: create a free project at [neon.tech](https://neon.tech) (or any
+  Postgres host) and copy its connection string into `DATABASE_URL`.
 
 `frontend/.env`:
 ```
@@ -82,19 +89,26 @@ VITE_API_URL=http://localhost:8000
 
 `.env` files are gitignored; never commit real credentials.
 
-### 3. Initialize local data stores
+### 3. Initialize data stores
 
-The repo ships with a populated `data/` folder (SQLite DB + local Qdrant backup),
-so this is only needed starting from an empty `data/` directory:
+Against a fresh Postgres database and/or Qdrant cluster:
 
 ```bash
 .venv/Scripts/python db_init_setup/setup_db.py
 .venv/Scripts/python db_init_setup/setup_qdrant.py
 ```
 
-If you're moving an existing local-only Qdrant collection to a new cloud cluster,
-use `db_init_setup/migrate_qdrant_to_cloud.py` instead (creates the cloud collection
-if missing, then copies every point across).
+The repo also ships with a populated `data/qdrant_db` folder (the local Qdrant
+backup mirror) so the app has data to work with out of the box once you've pointed
+`DATABASE_URL` at your own Postgres instance and re-run the migration below.
+
+Moving existing data to a new provider:
+- `db_init_setup/migrate_qdrant_to_cloud.py` — copies every point from the local
+  Qdrant backup into a (new) cloud cluster.
+- `db_init_setup/migrate_sqlite_to_postgres.py` — one-time historical script that
+  moved this project's original SQLite data into Postgres, preserving row `id`s
+  (which Qdrant's vectors reference via `personId`). Kept as a reference/template
+  if you ever need to do the same.
 
 ## Running
 
@@ -202,14 +216,14 @@ api/
   helpers.py                  Shared image-decode + embedding helper
   auth.py                     JWT issuance/verification, bcrypt check, require_admin dependency
 db/
-  sqlite_store.py             Person metadata (SQLite)
-  qdrant_store.py             Face embeddings (Qdrant Cloud + local backup mirror)
+  postgres_store.py           Person metadata (Postgres, pooled connections)
+  qdrant_store.py              Face embeddings (Qdrant Cloud + local backup mirror)
   cloudinary_store.py         Photo uploads
 db_init_setup/
-  setup_db.py                 Creates the SQLite `people` table
-  setup_qdrant.py             Creates the Qdrant `faces` collection (cloud)
+  setup_db.py                 Creates the Postgres `people` table
+  setup_qdrant.py              Creates the Qdrant `faces` collection (cloud)
   migrate_qdrant_to_cloud.py  One-off: copy a local Qdrant collection to a cloud cluster
-  add_photo_position_columns.py  One-off: adds photo_position_x/y columns
+  migrate_sqlite_to_postgres.py  One-off: historical SQLite → Postgres data migration
   backfill_profile_photos.py  One-off: bulk-upload profile photos from a local folder
 utils/
   embedding.py                InsightFace wrapper (detect + embed)

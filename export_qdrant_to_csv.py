@@ -1,22 +1,22 @@
 import csv
-from db.sqlite_store import get_connection
+from db.postgres_store import close_pool, get_pool
 from db.qdrant_store import  get_client
 
 
 COLLECTION_NAME = "faces"
 OUT_PATH = "data/qdrant_view.csv"
 
-connection = get_connection()   #sqlite
 client = get_client()           #qdrant
 
 
-people = {
-    person_id: (name, gender, race)
-    for person_id, name, gender, race in connection.execute(
-        "SELECT id, name, gender, race FROM people"
-    )
-}
-connection.close()
+with get_pool().connection() as connection:
+    people = {
+        person_id: (name, gender, race)
+        for person_id, name, gender, race in connection.execute(
+            "SELECT id, name, gender, race FROM people"
+        )
+    }
+close_pool()
 
 
 rows = []

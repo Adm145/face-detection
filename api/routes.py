@@ -11,7 +11,7 @@ from api.helpers import decode_and_embed
 from api.schemas import AddPhotosResponse, CompareResponse, DeleteResponse, EnrollResponse, LoginRequest, LoginResponse, PersonOut, PersonUpdate, SearchResponse, SearchResult, validate_birthday
 from db.cloudinary_store import upload_photo
 from db.qdrant_store import delete_by_person, insert, search, search_within_person
-from db.sqlite_store import delete_person, get_person, insert_person, list_people, update_person
+from db.postgres_store import delete_person, get_person, insert_person, list_people, update_person
 
 router = APIRouter()
 
