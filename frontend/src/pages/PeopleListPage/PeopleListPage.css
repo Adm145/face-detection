@@ -173,5 +173,58 @@
 
   .people-grid {
     grid-template-columns: 1fr;
+    gap: 0;
+    background: var(--color-canvas);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .person-card {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-sm);
+    border-radius: 0;
+    box-shadow: none;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-hairline);
+    position: relative;
+  }
+
+  .people-grid .person-card:last-child {
+    border-bottom: none;
+  }
+
+  .person-card-photo {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+  }
+
+  .person-card-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 1px;
+  }
+
+  .person-card-name,
+  .person-card-profession {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .person-card-meta {
+    display: none;
+  }
+
+  .person-card::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-top: 1.5px solid var(--color-hairline-strong);
+    border-right: 1.5px solid var(--color-hairline-strong);
+    transform: rotate(45deg);
   }
 }
