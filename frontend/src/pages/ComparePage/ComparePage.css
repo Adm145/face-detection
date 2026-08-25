@@ -1,0 +1,121 @@
+.compare-page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-lg);
+  background: var(--color-canvas-soft);
+}
+
+.compare-shell {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.compare-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.compare-header h1 {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -1.28px;
+}
+
+.compare-subtitle {
+  color: var(--color-body);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.compare-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.compare-slots {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.drop-slot {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.drop-slot.dropzone {
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.drop-slot-filled {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-hairline);
+}
+
+.drop-slot-filled img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.compare-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--color-canvas);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
+  padding: var(--space-xl);
+}
+
+.compare-score-label {
+  font-size: 14px;
+  color: var(--color-mute);
+  font-family: var(--font-mono);
+}
+
+.compare-score {
+  font-size: 48px;
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -2.4px;
+  color: var(--color-ink);
+}
+
+.compare-match-badge,
+.compare-nomatch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.compare-match-badge {
+  background: color-mix(in srgb, var(--color-link) 12%, white);
+  color: var(--color-link);
+}
+
+.compare-nomatch-badge {
+  background: var(--color-error-soft);
+  color: var(--color-error-deep);
+}
+
+@media (max-width: 640px) {
+  .compare-slots {
+    flex-direction: column;
+  }
+}

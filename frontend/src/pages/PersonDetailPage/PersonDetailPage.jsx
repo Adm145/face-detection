@@ -1,12 +1,11 @@
-import { Link, useParams } from 'react-router-dom'
-import { usePersonDetail } from '../../hooks/usePersonDetail'
-import NavBar from '../../components/NavBar'
-import PersonDetailForm from '../../components/PersonDetailForm'
-import AddPhotosPanel from '../../components/AddPhotosPanel'
-import './PersonDetailPage.css'
+import { Link, useParams } from "react-router-dom";
+import { usePersonDetail } from "../../hooks/usePersonDetail";
+import PersonDetailForm from "../../components/PersonDetailForm";
+import AddPhotosPanel from "../../components/AddPhotosPanel";
+import "./PersonDetailPage.css";
 
 export default function PersonDetailPage() {
-  const { id } = useParams()
+  const { id } = useParams();
   const {
     person,
     loading,
@@ -24,55 +23,52 @@ export default function PersonDetailPage() {
     photoStatus,
     photoError,
     handlePhotoUpload,
-  } = usePersonDetail(id)
+  } = usePersonDetail(id);
 
   return (
-    <>
-      <NavBar />
-      <main className="person-detail-page">
-        <div className="person-detail-shell">
-          {loading && <p className="people-status">Loading…</p>}
+    <main className="person-detail-page">
+      <div className="person-detail-shell">
+        {loading && <p className="people-status">Loading…</p>}
 
-          {!loading && loadError && (
-            <div className="person-detail-error">
-              <p>{loadError}</p>
-              <Link to="/people" className="btn-primary">
-                Back to People
-              </Link>
+        {!loading && loadError && (
+          <div className="person-detail-error">
+            <p>{loadError}</p>
+            <Link to="/people" className="btn-primary">
+              Back to People
+            </Link>
+          </div>
+        )}
+
+        {!loading && !loadError && person && (
+          <>
+            <div className="person-detail-breadcrumb">
+              <span>
+                <Link to="/people">People</Link> / {person.name}
+              </span>
+              <h1>{person.name}</h1>
             </div>
-          )}
 
-          {!loading && !loadError && person && (
-            <>
-              <div className="person-detail-breadcrumb">
-                <span>
-                  <Link to="/people">People</Link> / {person.name}
-                </span>
-                <h1>{person.name}</h1>
-              </div>
+            <PersonDetailForm
+              person={person}
+              formFields={formFields}
+              setFormFields={setFormFields}
+              saveStatus={saveStatus}
+              saveError={saveError}
+              handleSave={handleSave}
+              confirmingDelete={confirmingDelete}
+              setConfirmingDelete={setConfirmingDelete}
+              deleteStatus={deleteStatus}
+              deleteError={deleteError}
+              handleDelete={handleDelete}
+              photoStatus={photoStatus}
+              photoError={photoError}
+              handlePhotoUpload={handlePhotoUpload}
+            />
 
-              <PersonDetailForm
-                person={person}
-                formFields={formFields}
-                setFormFields={setFormFields}
-                saveStatus={saveStatus}
-                saveError={saveError}
-                handleSave={handleSave}
-                confirmingDelete={confirmingDelete}
-                setConfirmingDelete={setConfirmingDelete}
-                deleteStatus={deleteStatus}
-                deleteError={deleteError}
-                handleDelete={handleDelete}
-                photoStatus={photoStatus}
-                photoError={photoError}
-                handlePhotoUpload={handlePhotoUpload}
-              />
-
-              <AddPhotosPanel personId={id} />
-            </>
-          )}
-        </div>
-      </main>
-    </>
-  )
+            <AddPhotosPanel personId={id} />
+          </>
+        )}
+      </div>
+    </main>
+  );
 }
