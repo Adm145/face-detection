@@ -1,20 +1,30 @@
 # face-detection
 
-A FastAPI service for face recognition: enroll people from photos, then search an
-uploaded photo against enrolled faces, or compare two faces directly.
+A full-stack face recognition app: enroll people from photos, then search an
+uploaded photo against enrolled faces, compare two faces directly, and manage
+enrolled people through a React admin UI.
 
 Face embeddings are generated with [InsightFace](https://github.com/deepinsight/insightface)
-(`buffalo_l`), stored and searched with [Qdrant](https://qdrant.tech/) (embedded/local mode),
-person metadata lives in SQLite, and enrollment photos are hosted on
-[Cloudinary](https://cloudinary.com/).
+(`buffalo_l`) and stored/searched with [Qdrant Cloud](https://qdrant.tech/), with a
+local Qdrant copy kept as a write-through backup. Person metadata lives in SQLite,
+enrollment photos are hosted on [Cloudinary](https://cloudinary.com/), and admin-only
+actions (enrolling, editing, deleting, managing photos) are protected by JWT login.
 
 ## Tech stack
 
+**Backend**
 - **FastAPI** + Uvicorn — HTTP API
 - **InsightFace** (`buffalo_l`) + OpenCV — face detection and 512-d embeddings
-- **Qdrant** (embedded, file-based) — vector similarity search
-- **SQLite** — person metadata (name, gender, race, birthday, profession, image link)
-- **Cloudinary** — enrollment photo storage
+- **Qdrant Cloud** — primary vector similarity search, with a local embedded Qdrant
+  copy at `data/qdrant_db` kept in sync as a backup on every insert/delete
+- **SQLite** — person metadata (name, gender, race, birthday, profession, image
+  link, profile photo framing)
+- **Cloudinary** — profile/enrollment photo storage
+- **PyJWT** + **bcrypt** — admin authentication
+
+**Frontend**
+- **React** + **Vite** + **React Router**
+- Plain CSS (no framework) — design tokens in `frontend/DESIGN.md`
 
 ## Setup
 
@@ -23,63 +33,123 @@ person metadata lives in SQLite, and enrollment photos are hosted on
 ```bash
 python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt
+
+cd frontend
+npm install
 ```
 
 ### 2. Configure environment variables
 
-Copy the example file and fill in your own Cloudinary credentials (from your
-[Cloudinary dashboard](https://console.cloudinary.com/)):
+Copy the example file and fill in your own values:
 
 ```bash
 cp .env.example .env
+cp frontend/.env.example frontend/.env
 ```
 
-`.env`:
+Root `.env`:
 ```
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 CLOUDINARY_URL=cloudinary://${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}@${CLOUDINARY_CLOUD_NAME}
+
+QDRANT_API_KEY=
+QDRANT_CLUSTER_URL=
+
+ADMIN_USERNAME=
+ADMIN_PASSWORD_HASH=
+JWT_SECRET=
 ```
 
-`CLOUDINARY_URL` is built from the three values above — change any one of them and
-it updates automatically. `.env` is gitignored; never commit real credentials.
+- **Cloudinary**: from your [Cloudinary dashboard](https://console.cloudinary.com/).
+  `CLOUDINARY_URL` is built from the three values above — change any one and it
+  updates automatically.
+- **Qdrant**: create a free cluster at [cloud.qdrant.io](https://cloud.qdrant.io),
+  then copy its API key and cluster URL.
+- **Admin credentials**: `ADMIN_USERNAME` is plain text. `ADMIN_PASSWORD_HASH` must
+  be a bcrypt hash, not plain text — generate one with:
+  ```bash
+  .venv/Scripts/python -c "import bcrypt; print(bcrypt.hashpw(b'your-password', bcrypt.gensalt()).decode())"
+  ```
+  `JWT_SECRET` can be any long random string, e.g.
+  `python -c "import secrets; print(secrets.token_hex(32))"`.
+
+`frontend/.env`:
+```
+VITE_API_URL=http://localhost:8000
+```
+
+`.env` files are gitignored; never commit real credentials.
 
 ### 3. Initialize local data stores
 
-The repo already ships with a populated `data/` folder (SQLite DB + Qdrant collection),
-so this step is only needed if you're starting from an empty `data/` directory:
+The repo ships with a populated `data/` folder (SQLite DB + local Qdrant backup),
+so this is only needed starting from an empty `data/` directory:
 
 ```bash
 .venv/Scripts/python db_init_setup/setup_db.py
 .venv/Scripts/python db_init_setup/setup_qdrant.py
 ```
 
-## Running the server
+If you're moving an existing local-only Qdrant collection to a new cloud cluster,
+use `db_init_setup/migrate_qdrant_to_cloud.py` instead (creates the cloud collection
+if missing, then copies every point across).
 
+## Running
+
+Backend:
 ```bash
 fastapi dev main.py
 ```
-
 By default this binds to `127.0.0.1` (localhost only). To make it reachable from
-another machine on the same network:
-
+another device on the same network (e.g. testing on your phone):
 ```bash
 fastapi dev main.py --host 0.0.0.0
 ```
+Interactive API docs (Swagger UI) are available at `/docs`.
 
-Interactive API docs (Swagger UI) are available at `/docs` once the server is running.
+Frontend:
+```bash
+cd frontend
+npm run dev
+```
+For the frontend to be reachable from other devices too, `frontend/vite.config.js`
+already sets `server: { host: true }` — just make sure `VITE_API_URL` in
+`frontend/.env` points at your machine's LAN IP rather than `localhost` in that case.
+
+## Authentication
+
+Enrolling, editing, deleting, and managing a person's photos requires an admin
+login; browsing people, searching, and comparing do not.
+
+| Gated (admin only) | Public |
+|---|---|
+| `POST /enroll` | `GET /people` |
+| `PATCH /people/{id}` | `GET /people/{id}` |
+| `DELETE /people/{id}` | `POST /search` |
+| `POST /people/{id}/photo` | `POST /compare` |
+| `POST /people/{id}/photos` | |
+
+Log in via `POST /auth/login` (or the `/login` page in the UI) to get a JWT, then
+send it as `Authorization: Bearer <token>` on gated requests. Tokens expire after
+24 hours.
 
 ## API
 
-| Method | Path                 | Description                                                        |
-|--------|----------------------|----------------------------------------------------------------------|
-| GET    | `/health`            | Health check                                                       |
-| GET    | `/people`            | List all enrolled people                                           |
-| PATCH  | `/people/{person_id}`| Partially update a person's metadata                                |
-| POST   | `/enroll`             | Enroll a person from name + metadata + at least 5 usable photos    |
-| POST   | `/search`             | Upload a photo, get the closest matching enrolled people           |
-| POST   | `/compare`            | Upload two photos, get a similarity score and match/no-match       |
+| Method | Path                        | Auth  | Description                                                        |
+|--------|-----------------------------|-------|----------------------------------------------------------------------|
+| GET    | `/health`                   | –     | Health check                                                       |
+| POST   | `/auth/login`                | –     | Log in, returns a JWT                                              |
+| GET    | `/people`                   | –     | List all enrolled people                                           |
+| GET    | `/people/{person_id}`        | –     | Get one person's details                                           |
+| PATCH  | `/people/{person_id}`        | admin | Partially update a person's metadata or profile-photo framing      |
+| DELETE | `/people/{person_id}`        | admin | Delete a person and their face vectors                             |
+| POST   | `/people/{person_id}/photo`  | admin | Replace the profile photo (must match the person's own face)       |
+| POST   | `/people/{person_id}/photos` | admin | Add more enrollment photos to an existing person                    |
+| POST   | `/enroll`                    | admin | Enroll a person from name + metadata + at least 5 usable photos    |
+| POST   | `/search`                    | –     | Upload a photo, get the closest matching enrolled people           |
+| POST   | `/compare`                   | –     | Upload two photos, get a similarity score and match/no-match       |
 
 ### `POST /enroll`
 
@@ -88,15 +158,39 @@ Form fields: `name` (required), `gender`, `race`, `birthday`, `profession`
 The first successfully-processed photo is uploaded to Cloudinary and stored as that
 person's `image_link`.
 
+### `POST /people/{person_id}/photo`
+
+Multipart `file`. The photo must score above the match threshold against that
+person's *existing* face embeddings (rejected otherwise) — this replaces the
+display photo only and does not add a new search vector. Resets the photo's
+framing (`photo_position_x/y`) back to centered.
+
+### `POST /people/{person_id}/photos`
+
+Multipart `files` (one or more). Each photo is checked the same way as above
+(detectable face + matches this person); anything that fails either check is
+skipped and listed in the response rather than rejecting the whole request.
+
 ### `POST /search`
 
-Multipart `file` + optional `top_k` query param (default 3). Returns the closest
+Multipart `file` + optional `top_k` query param (default 1). Returns the closest
 matching enrolled people with a similarity `score`.
 
 ### `POST /compare`
 
 Multipart `file_a` + `file_b`. Returns a cosine similarity `score` and a boolean
 `match` (threshold: 0.5).
+
+## Frontend routes
+
+| Path | Page | Auth |
+|---|---|---|
+| `/` | Search — upload a photo, find matches | Public |
+| `/compare` | Compare two photos | Public |
+| `/people/:id` | Person detail — view, and (if logged in) edit/delete/manage photos | Public to view |
+| `/enroll` | Enroll a new person | Admin |
+| `/people` | Browse the full roster | Admin |
+| `/login` | Admin login | Public |
 
 ## Project structure
 
@@ -106,13 +200,25 @@ api/
   routes.py                   Route handlers
   schemas.py                  Pydantic request/response models
   helpers.py                  Shared image-decode + embedding helper
+  auth.py                     JWT issuance/verification, bcrypt check, require_admin dependency
 db/
   sqlite_store.py             Person metadata (SQLite)
-  qdrant_store.py             Face embeddings (Qdrant)
-  cloudinary_store.py         Enrollment photo uploads
+  qdrant_store.py             Face embeddings (Qdrant Cloud + local backup mirror)
+  cloudinary_store.py         Photo uploads
 db_init_setup/
   setup_db.py                 Creates the SQLite `people` table
-  setup_qdrant.py             Creates the Qdrant `faces` collection
+  setup_qdrant.py             Creates the Qdrant `faces` collection (cloud)
+  migrate_qdrant_to_cloud.py  One-off: copy a local Qdrant collection to a cloud cluster
+  add_photo_position_columns.py  One-off: adds photo_position_x/y columns
+  backfill_profile_photos.py  One-off: bulk-upload profile photos from a local folder
 utils/
   embedding.py                InsightFace wrapper (detect + embed)
+frontend/
+  src/
+    pages/                    UploadPage, PeopleListPage, PersonDetailPage, SearchPage,
+                               ComparePage, LoginPage — one folder per page (jsx + css)
+    components/                Presentational + form components shared across pages
+    hooks/                     Per-feature state/data hooks (one per page's data needs)
+    context/                   AuthContext (JWT token, login/logout)
+    styles/                    Shared CSS (design tokens, reusable classes)
 ```
