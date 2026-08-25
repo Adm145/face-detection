@@ -132,6 +132,53 @@ For the frontend to be reachable from other devices too, `frontend/vite.config.j
 already sets `server: { host: true }` — just make sure `VITE_API_URL` in
 `frontend/.env` points at your machine's LAN IP rather than `localhost` in that case.
 
+## Local backup automation
+
+Both cloud stores (Qdrant Cloud, Neon Postgres) are mirrored to local files —
+`data/qdrant_db` and `data/people.db` — as a safety net against free-tier
+suspension/deletion. Rather than relying on the *deployed* app to keep these
+current (which only works if the host has persistent storage), a scheduled task
+on this machine pulls the latest state down on its own schedule:
+
+- `db_init_setup/pull_postgres_to_sqlite.py` / `pull_qdrant_to_local.py` — read
+  everything from the cloud stores and overwrite the local copies (including
+  removing anything deleted on the cloud side since the last pull).
+- `db_init_setup/run_backup_pull.bat` runs both, logging to `data/backup_pull.log`.
+- Registered as a Windows Scheduled Task (`FaceDetectionBackupPull`, daily at
+  8:00 PM) — check on it with
+  `schtasks /Query /TN "FaceDetectionBackupPull" /V /FO LIST`.
+
+If a cloud provider ever wipes a free-tier cluster/database: create a fresh one,
+point the deployed app's env vars at it, then run `migrate_qdrant_to_cloud.py`
+and/or `migrate_sqlite_to_postgres.py` using the local copies as the source —
+those already do the "push local data back up" direction.
+
+This means the deployed host itself never needs a persistent volume — its own
+local backup writes (from the same dual-write code, still active in production)
+are just a bonus that may or may not survive a restart depending on the host;
+the real safety net is this machine's scheduled pull.
+
+## Deployment
+
+Backend on [Railway](https://railway.app), frontend on [Netlify](https://netlify.com).
+
+**Backend (Railway)**: deploys from the root `Dockerfile`. In the Railway
+dashboard, set every variable from your local `.env` as an environment variable
+on the service (Cloudinary, Qdrant, admin/JWT, `DATABASE_URL`) — do not upload
+the `.env` file itself. Railway assigns a public URL once deployed.
+
+**Frontend (Netlify)**: `netlify.toml` at the repo root already configures the
+build (`base = frontend`, `npm run build`, publish `frontend/dist`).
+`frontend/public/_redirects` handles client-side routing (without it, refreshing
+on any route other than `/` would 404, since a static host otherwise looks for a
+literal file at that path). Set `VITE_API_URL` as a Netlify environment variable
+to the Railway backend's URL — this must happen *after* the backend is deployed,
+since Vite bakes env vars in at build time, not runtime.
+
+**Then, tighten CORS**: once you have the Netlify URL, set `CORS_ORIGINS` in
+Railway to that domain (comma-separated if there's more than one) instead of the
+default `*`, and redeploy the backend.
+
 ## Authentication
 
 Enrolling, editing, deleting, and managing a person's photos requires an admin

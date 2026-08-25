@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -23,9 +24,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Face Detection API", lifespan=lifespan)
 
+cors_origins = os.environ.get("CORS_ORIGINS", "*")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"] if cors_origins == "*" else [origin.strip() for origin in cors_origins.split(",")],
     allow_methods=["*"],
     allow_headers=["*"],
 )
