@@ -34,7 +34,7 @@ export default function SearchForm({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
         >
-          <p className="dropzone-title">Drag a photo here, or click to browse</p>
+          <p className="dropzone-title">Tap to browse, or drag a photo here</p>
           <p className="dropzone-hint">JPG or PNG · one clear, front-facing photo</p>
           <input
             ref={fileInputRef}

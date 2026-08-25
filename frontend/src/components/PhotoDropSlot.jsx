@@ -34,7 +34,7 @@ export default function PhotoDropSlot({ label, photo, isDragging, setIsDragging,
       onDrop={onDrop}
     >
       <p className="dropzone-title">{label}</p>
-      <p className="dropzone-hint">Drag or click to browse</p>
+      <p className="dropzone-hint">Tap to browse, or drag</p>
       <input
         ref={fileInputRef}
         type="file"

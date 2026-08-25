@@ -114,7 +114,7 @@ export default function EnrollForm({
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
             >
-              <p className="dropzone-title">Drag photos here, or click to browse</p>
+              <p className="dropzone-title">Tap to browse, or drag photos here</p>
               <p className="dropzone-hint">JPG or PNG · clear, front-facing faces work best</p>
               <input
                 ref={fileInputRef}
