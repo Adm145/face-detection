@@ -1,8 +1,7 @@
-import { useEnrollForm } from '../../hooks/useEnrollform'
-import NavBar from '../../components/NavBar'
-import EnrollForm from '../../components/EnrollForm'
-import EnrollSuccess from '../../components/EnrollSuccess'
-import './UploadPage.css'
+import { useEnrollForm } from "../../hooks/useEnrollform";
+import EnrollForm from "../../components/EnrollForm";
+import EnrollSuccess from "../../components/EnrollSuccess";
+import "./UploadPage.css";
 
 export default function UploadPage() {
   const {
@@ -21,12 +20,11 @@ export default function UploadPage() {
     handleDrop,
     handleSubmit,
     resetForm,
-  } = useEnrollForm()
+  } = useEnrollForm();
 
   return (
     <>
-      <NavBar />
-      {status === 'success' && result ? (
+      {status === "success" && result ? (
         <EnrollSuccess result={result} onReset={resetForm} />
       ) : (
         <EnrollForm
@@ -46,5 +44,5 @@ export default function UploadPage() {
         />
       )}
     </>
-  )
+  );
 }

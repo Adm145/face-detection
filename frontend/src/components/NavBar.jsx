@@ -4,6 +4,7 @@ const LINKS = [
   { to: '/', label: 'Enroll' },
   { to: '/people', label: 'People' },
   { to: '/search', label: 'Search' },
+  { to: '/compare', label: 'Compare' },
 ]
 
 export default function NavBar() {
@@ -32,7 +33,6 @@ export default function NavBar() {
             </Link>
           )
         })}
-        <span className="nav-link-disabled">Compare</span>
       </div>
 
       <div className="nav-spacer" />
