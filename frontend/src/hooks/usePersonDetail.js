@@ -31,6 +31,7 @@ export const usePersonDetail = (personId) => {
 
   const [photoStatus, setPhotoStatus] = useState('idle') // idle | uploading | error
   const [photoError, setPhotoError] = useState('')
+  const [repositioning, setRepositioning] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -145,6 +146,27 @@ export const usePersonDetail = (personId) => {
 
       setPerson(data)
       setPhotoStatus('idle')
+      setRepositioning(true)
+    } catch (err) {
+      setPhotoError(err.message || 'Something went wrong')
+      setPhotoStatus('error')
+    }
+  }
+
+  const handlePositionSave = async (x, y) => {
+    try {
+      const response = await fetch(`${API_URL}/people/${personId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ photo_position_x: x, photo_position_y: y }),
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Update failed')
+      }
+
+      setPerson(data)
     } catch (err) {
       setPhotoError(err.message || 'Something went wrong')
       setPhotoStatus('error')
@@ -173,5 +195,8 @@ export const usePersonDetail = (personId) => {
     photoStatus,
     photoError,
     handlePhotoUpload,
+    repositioning,
+    setRepositioning,
+    handlePositionSave,
   }
 }

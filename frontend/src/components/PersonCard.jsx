@@ -11,7 +11,12 @@ export default function PersonCard({ person }) {
   return (
     <Link to={`/people/${person.id}`} className="person-card">
       <div className="person-card-photo">
-        <PersonAvatar imageLink={person.image_link} iconSize={28} />
+        <PersonAvatar
+          imageLink={person.image_link}
+          iconSize={28}
+          positionX={person.photo_position_x}
+          positionY={person.photo_position_y}
+        />
       </div>
       <div className="person-card-body">
         <span className="person-card-name">{person.name}</span>

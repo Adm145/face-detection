@@ -1,6 +1,6 @@
-export default function PersonAvatar({ imageLink, iconSize = 24 }) {
+export default function PersonAvatar({ imageLink, iconSize = 24, positionX = 50, positionY = 50 }) {
   if (imageLink) {
-    return <img src={imageLink} alt="" />
+    return <img src={imageLink} alt="" style={{ objectPosition: `${positionX}% ${positionY}%` }} />
   }
 
   return (

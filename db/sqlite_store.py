@@ -9,7 +9,10 @@ def get_connection():
 def get_person(person_id):
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race, birthday, profession, image_link FROM people WHERE id = ?", (person_id,))
+    cursor.execute(
+        "SELECT id, name, gender, race, birthday, profession, image_link, photo_position_x, photo_position_y FROM people WHERE id = ?",
+        (person_id,),
+    )
     row = cursor.fetchone()
     connection.close()
     return row
@@ -18,13 +21,25 @@ def get_person(person_id):
 def list_people():
     connection = get_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT id, name, gender, race, birthday, profession, image_link FROM people ORDER BY id")
+    cursor.execute(
+        "SELECT id, name, gender, race, birthday, profession, image_link, photo_position_x, photo_position_y FROM people ORDER BY id"
+    )
     rows = cursor.fetchall()
     connection.close()
     return rows
 
 
-def update_person(person_id, name=None, gender=None, race=None, birthday=None, profession=None, image_link=None):
+def update_person(
+    person_id,
+    name=None,
+    gender=None,
+    race=None,
+    birthday=None,
+    profession=None,
+    image_link=None,
+    photo_position_x=None,
+    photo_position_y=None,
+):
     fields = {}
     if name is not None:
         fields["name"] = name
@@ -38,6 +53,10 @@ def update_person(person_id, name=None, gender=None, race=None, birthday=None, p
         fields["profession"] = profession
     if image_link is not None:
         fields["image_link"] = image_link
+    if photo_position_x is not None:
+        fields["photo_position_x"] = photo_position_x
+    if photo_position_y is not None:
+        fields["photo_position_y"] = photo_position_y
 
     if not fields:
         return

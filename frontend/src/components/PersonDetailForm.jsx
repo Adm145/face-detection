@@ -17,6 +17,9 @@ export default function PersonDetailForm({
   photoError,
   handlePhotoUpload,
   isAuthenticated,
+  repositioning,
+  setRepositioning,
+  handlePositionSave,
 }) {
   const { name, gender, race, birthday, profession } = formFields;
 
@@ -25,10 +28,15 @@ export default function PersonDetailForm({
       <div className="person-detail-photo-col">
         <PersonPhotoUpload
           imageLink={person.image_link}
+          positionX={person.photo_position_x}
+          positionY={person.photo_position_y}
           status={photoStatus}
           error={photoError}
           onUpload={handlePhotoUpload}
           isAuthenticated={isAuthenticated}
+          repositioning={repositioning}
+          setRepositioning={setRepositioning}
+          onSavePosition={handlePositionSave}
         />
 
         {isAuthenticated && (
