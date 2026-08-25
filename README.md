@@ -168,7 +168,8 @@ on the service (Cloudinary, Qdrant, admin/JWT, `DATABASE_URL`) — do not upload
 the `.env` file itself. Railway assigns a public URL once deployed.
 
 **Frontend (Netlify)**: `netlify.toml` at the repo root already configures the
-build (`base = frontend`, `npm run build`, publish `frontend/dist`).
+build (`base = frontend`, `npm run build`, publish `dist` — resolved relative
+to `base`, so this is `frontend/dist` in the repo).
 `frontend/public/_redirects` handles client-side routing (without it, refreshing
 on any route other than `/` would 404, since a static host otherwise looks for a
 literal file at that path). Set `VITE_API_URL` as a Netlify environment variable
