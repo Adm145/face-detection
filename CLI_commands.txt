@@ -1,3 +1,5 @@
-.venv/Scripts/pip install -r requirements.txt - install dependencies
+.venv/Scripts/pip install -r requirements.txt
 
-fastapi dev main.py - run the server
+fastapi dev main.py 
+
+fastapi dev main.py --host 0.0.0.0
