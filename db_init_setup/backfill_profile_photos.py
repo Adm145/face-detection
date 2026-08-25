@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from db.cloudinary_store import upload_photo
-from db.sqlite_store import get_connection, update_person
+from db.postgres_store import close_pool, get_pool, update_person
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
-def find_person_id(cursor, name: str):
-    cursor.execute("SELECT id FROM people WHERE LOWER(name) = LOWER(?)", (name,))
+def find_person_id(connection, name: str):
+    cursor = connection.execute("SELECT id FROM people WHERE LOWER(name) = LOWER(%s)", (name,))
     row = cursor.fetchone()
     return row[0] if row else None
 
@@ -23,29 +23,27 @@ def main(folder: str):
         print(f"Not a directory: {folder_path}")
         return
 
-    connection = get_connection()
-    cursor = connection.cursor()
-
     uploaded = []
     unmatched = []
 
-    for file_path in sorted(folder_path.iterdir()):
-        if file_path.suffix.lower() not in IMAGE_EXTENSIONS:
-            continue
+    with get_pool().connection() as connection:
+        for file_path in sorted(folder_path.iterdir()):
+            if file_path.suffix.lower() not in IMAGE_EXTENSIONS:
+                continue
 
-        name = file_path.stem.replace("_", " ").strip()
-        person_id = find_person_id(cursor, name)
+            name = file_path.stem.replace("_", " ").strip()
+            person_id = find_person_id(connection, name)
 
-        if person_id is None:
-            unmatched.append(file_path.name)
-            continue
+            if person_id is None:
+                unmatched.append(file_path.name)
+                continue
 
-        image_link = upload_photo(file_path.read_bytes())
-        update_person(person_id, image_link=image_link)
-        uploaded.append((person_id, name))
-        print(f"Uploaded photo for '{name}' (id {person_id})")
+            image_link = upload_photo(file_path.read_bytes())
+            update_person(person_id, image_link=image_link)
+            uploaded.append((person_id, name))
+            print(f"Uploaded photo for '{name}' (id {person_id})")
 
-    connection.close()
+    close_pool()
 
     print(f"\nDone. {len(uploaded)} uploaded, {len(unmatched)} unmatched.")
     if unmatched:

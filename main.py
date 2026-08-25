@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from db.qdrant_store import close_client
+from db.postgres_store import close_pool
 from api.routes import router
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     yield
     close_client()
+    close_pool()
 
 app = FastAPI(title="Face Detection API", lifespan=lifespan)
 

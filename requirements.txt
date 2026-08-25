@@ -10,3 +10,4 @@ python-dotenv
 cloudinary
 pyjwt
 bcrypt
+psycopg[binary,pool]
