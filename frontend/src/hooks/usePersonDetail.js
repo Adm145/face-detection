@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../config'
+import { useAuth } from '../context/AuthContext'
 import { toDDMMYYYY, toISODate } from '../utils/date'
 
 const emptyFields = {
@@ -13,6 +14,7 @@ const emptyFields = {
 
 export const usePersonDetail = (personId) => {
   const navigate = useNavigate()
+  const { token } = useAuth()
 
   const [person, setPerson] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -83,7 +85,7 @@ export const usePersonDetail = (personId) => {
     try {
       const response = await fetch(`${API_URL}/people/${personId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       })
       const data = await response.json()
@@ -105,7 +107,10 @@ export const usePersonDetail = (personId) => {
     setDeleteError('')
 
     try {
-      const response = await fetch(`${API_URL}/people/${personId}`, { method: 'DELETE' })
+      const response = await fetch(`${API_URL}/people/${personId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
       if (!response.ok) {
         const data = await response.json()
         throw new Error(data.detail || 'Delete failed')
@@ -129,6 +134,7 @@ export const usePersonDetail = (personId) => {
     try {
       const response = await fetch(`${API_URL}/people/${personId}/photo`, {
         method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       })
       const data = await response.json()

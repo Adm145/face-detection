@@ -1,14 +1,22 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const LINKS = [
-  { to: '/', label: 'Enroll' },
-  { to: '/people', label: 'People' },
-  { to: '/search', label: 'Search' },
-  { to: '/compare', label: 'Compare' },
-]
+  { to: "/", label: "Search" },
+  { to: "/compare", label: "Compare" },
+  { to: "/enroll", label: "Enroll" },
+  { to: "/people", label: "People" },
+];
 
 export default function NavBar() {
-  const { pathname } = useLocation()
+  const { pathname } = useLocation();
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav className="nav-bar">
@@ -26,16 +34,35 @@ export default function NavBar() {
 
       <div className="nav-links">
         {LINKS.map((link) => {
-          const isActive = link.to === '/' ? pathname === '/' : pathname.startsWith(link.to)
+          const isActive =
+            link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
           return (
-            <Link key={link.to} to={link.to} className={`nav-link${isActive ? ' nav-link-active' : ''}`}>
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`nav-link${isActive ? " nav-link-active" : ""}`}
+            >
               {link.label}
             </Link>
-          )
+          );
         })}
       </div>
 
-      <div className="nav-spacer" />
+      <div className="nav-auth">
+        {isAuthenticated ? (
+          <button
+            type="button"
+            className="nav-auth-link"
+            onClick={handleLogout}
+          >
+            Log out
+          </button>
+        ) : (
+          <Link to="/login" className="nav-auth-link">
+            Log in
+          </Link>
+        )}
+      </div>
     </nav>
-  )
+  );
 }

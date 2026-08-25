@@ -187,6 +187,26 @@
   gap: var(--space-lg);
 }
 
+.person-detail-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.person-detail-fieldset:disabled .text-input {
+  background: var(--color-canvas-soft-2);
+  color: var(--color-mute);
+}
+
+.person-detail-readonly-note {
+  color: var(--color-mute);
+  font-size: 14px;
+}
+
 .person-detail-actions {
   display: flex;
   align-items: center;

@@ -16,6 +16,7 @@ export default function PersonDetailForm({
   photoStatus,
   photoError,
   handlePhotoUpload,
+  isAuthenticated,
 }) {
   const { name, gender, race, birthday, profession } = formFields;
 
@@ -27,16 +28,19 @@ export default function PersonDetailForm({
           status={photoStatus}
           error={photoError}
           onUpload={handlePhotoUpload}
+          isAuthenticated={isAuthenticated}
         />
 
-        <DeleteConfirm
-          personName={person.name}
-          confirming={confirmingDelete}
-          setConfirming={setConfirmingDelete}
-          status={deleteStatus}
-          error={deleteError}
-          onDelete={handleDelete}
-        />
+        {isAuthenticated && (
+          <DeleteConfirm
+            personName={person.name}
+            confirming={confirmingDelete}
+            setConfirming={setConfirmingDelete}
+            status={deleteStatus}
+            error={deleteError}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
 
       <div className="person-detail-fields">
@@ -44,6 +48,11 @@ export default function PersonDetailForm({
           <div className="error-banner">{saveError}</div>
         )}
 
+        {!isAuthenticated && (
+          <p className="person-detail-readonly-note">Log in as admin to edit this person.</p>
+        )}
+
+        <fieldset className="person-detail-fieldset" disabled={!isAuthenticated}>
         <div className="field field-full">
           <span className="field-label">Name *</span>
           <input
@@ -131,6 +140,7 @@ export default function PersonDetailForm({
             {saveStatus === "saving" ? "Saving…" : "Save changes"}
           </button>
         </div>
+        </fieldset>
       </div>
     </form>
   );

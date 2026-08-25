@@ -75,3 +75,13 @@ class AddPhotosResponse(BaseModel):
     person_id: int
     added_count: int
     skipped_files: list[str]
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

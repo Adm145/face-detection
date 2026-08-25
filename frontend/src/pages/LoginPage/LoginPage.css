@@ -1,0 +1,43 @@
+.login-page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-lg);
+  background: var(--color-canvas-soft);
+}
+
+.login-shell {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.login-header h1 {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -1.28px;
+}
+
+.login-subtitle {
+  color: var(--color-body);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  background: var(--color-canvas);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-float);
+}
