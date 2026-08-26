@@ -17,7 +17,12 @@ _pool: ConnectionPool | None = None
 def get_pool() -> ConnectionPool:
     global _pool
     if _pool is None:
-        _pool = ConnectionPool(os.environ["DATABASE_URL"], kwargs={"autocommit": True}, open=True)
+        _pool = ConnectionPool(
+            os.environ["DATABASE_URL"],
+            kwargs={"autocommit": True},
+            open=True,
+            check=ConnectionPool.check_connection,
+        )
     return _pool
 
 
